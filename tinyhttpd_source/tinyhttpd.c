@@ -47,6 +47,113 @@ void serve_file(int, const char *); //调用cat，将服务器文件内容返回给浏览器
 int startup(u_short *); //开启http服务，包括绑定端口，监听，开启线程处理链接
 void unimplemented(int);    //返回给浏览器表明收到的http请求所用的method不被支持
 
+/************** accept_request ****************/
+/* A request has caused a call to accept() on the server port to
+ * return. Process the request appropriately.
+ * Parameters: the socket connected to the client
+*/
+
+/************** bad_request ****************/
+/*
+
+*/
+
+/************** cat ****************/
+/*
+
+*/
+
+/************** cannot_execute ****************/
+/*
+
+*/
+
+/************** error_die ****************/
+/*
+
+*/
+
+/************** execute_cgi ****************/
+/*
+
+*/
+
+/************** get_line ****************/
+/*
+
+*/
+
+/************** headers ****************/
+/*
+
+*/
+
+/************** not_found ****************/
+/*
+
+*/
+
+/************** serve_file ****************/
+/*
+
+*/
+
+/************** startup ****************/
+/* This function starts the process of listening for web connections
+ * on a specified port. If the port is 0, then dynamically allocate a
+ * port and modify the original port variable to reflect the actual
+ * port.
+ * Parameters: pointer to variable containing the port to connect on
+ * Returns: the socket
+*/
+/*启动服务器，包括创建服务器套接字，绑定端口，监听；
+ *返回一个监听套接字
+*/
+int startup(u_short *port)
+{
+    int httpd = 0;
+    struct sockaddr_in name;
+
+    httpd = socket(PF_INET, SOCK_STREAM, 0);    //创建服务器端套接字，成功但会非负，失败返回-1
+                                                //在代码中几乎都是本句的写法，这里注意PF_INET与AF_INET的区别（其实是可以混用的，是指不规范）
+                                                //AF_INET表明我们正在使用因特网
+                                                //SOCK_STREAM表示这个套接字是因特网连接的一个端点
+    if (httpd == -1)
+        error_die("socket");
+
+    memset(&name, 0, sizeof(name));
+    /*设置套接字地址结构*/
+    name.sin_family = AF_INET;  //设置地址簇，sin_family表示address family，AF_INET表示使用TCP/IP协议族的地址
+    name.sin_port = htons(*port);   //指定端口，sin_port表示port number，htons函数将主机的无符号短整型数转换成网络字节顺序
+    name.sin_addr.s_addr = htonl(INADDR_ANY);   //通配地址，s.addr表示ip address，htonl将主机数转换成无符号长整型的网络字节顺序
+
+    if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)    //将httpd套接字绑定到指定地址和端口
+                                                                    //bind函数将name中的服务器套接字地址和套接字描述符httpd联系起来
+                                                                    //成功返回0，失败返回-1
+        error_die("bind");
+
+    if (*port == 0) //如果*port==0，则动态分配一个端口
+    {
+        int namelen = sizeof(name);
+        //在以端口0调用bind后，getsockname用于返回由内核赋予的本地端口号
+        if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)   //getsockname用于获取套接字的地址结构
+                                                                            //在这里是以端口号0调用bind之后，用于返回内核赋予的本地端口号
+                                                                            //成功返回0，失败返回-1
+            error_die("getsockname");
+        *port = ntohs(name.sin_port);   //网络字节顺序转换为主机字节顺序，返回主机字节顺序表达的数
+    }
+
+    if (listen(httpd, 5) < 0)   //listen将httpd将主动套接字转化为监听套接字，之后可以接受来自客户端的连接请求
+                                //5这个参数暗示了内核在开始拒绝连接请求之前，应该放入队列中等待的未完成连接请求的数量，通常设置为1024
+        error_die("listen");
+
+    return(httpd);
+}
+
+/************* unimplemented **************/
+/*
+
+*/
 
 int main()
 {
