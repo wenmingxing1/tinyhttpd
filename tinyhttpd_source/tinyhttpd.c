@@ -9,8 +9,10 @@
 */
 
 /* logs */
-/* 2018-3-4 开始注释，并完成main函数的注释
- * 2018-3-5
+/* 2018-3-4 开始注释，并完成main函数的注释。
+ * 2018-3-5 完成核心函数startup，包括socket创建，绑定，监听；
+            完成所有辅助函数。
+
 */
 
 #include<stdio.h>
@@ -86,7 +88,7 @@ void cat(int client, FILE *resource)
 {
     //发送文件的内容
     char buf[1024];
-    //读取文件到buf中
+    //读取文件到buf中，fgets从文件结构体指针(FILE *resource)中读取数据，每次读取一行
     fgets(buf, sizeof(buf), resource);
     while (!feof(resource)) //判断文件是否读取到末尾；feof函数检测流上的文件结束符，如文件结束返回非0值
     {
@@ -105,14 +107,37 @@ void cat(int client, FILE *resource)
 }
 
 /************** cannot_execute ****************/
-/*
-
+/* Inform the client that a CGI script could not be executed
+ * Parameter: the client socket descriptor.
 */
+/*返回服务器错误，状态码500 */
+void cannot_execute(int client)
+{
+    char buf[1024];
+    //发送500，http状态码500，此错误是因为CGI脚本无法执行引起的
+    sprintf(buf, "HTTP/1.0 500 Internal Server Error\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "Content-type: text/html\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "<P>Error prohibited CGI execution.\r\n");
+    send(client, buf, strlen(buf), 0);
+}
 
 /************** error_die ****************/
-/*
-
+/* Print out an error message with perror() (for system errors; based
+ * on value of errno, which indicates system call errors) and exit the
+ * program indicating an error.
 */
+/* 打印出错误信息，并终止 */
+void error_die(const char *sc)
+{
+    perror(sc);     //perror函数用来将上一个函数发生错误的原因输出到标准设备(stderr)，
+                    //参数sc所指字符串会先打印;此错误原因依照全局变量errno的值来决定要输出的字符串
+                    //errno为记录系统的最后一次错误代码的全局变量
+    exit(1);    //exit(1)表示异常退出
+}
 
 /************** execute_cgi ****************/
 /*
@@ -120,24 +145,137 @@ void cat(int client, FILE *resource)
 */
 
 /************** get_line ****************/
-/*
-
+/* Get a line from a socket, whether the line ends in a newline,
+ * carriage return, or a CRLF combination. Terminates the string read
+ * with a null character. If no newline indicator is found before the
+ * end of the buffer, the string is terminated with a null. If any of
+ * the above three line terminators is read, the last character of the
+ * string will be a linefeed and the string will be terminated with a
+ * null character.
+ * Parameters: the socket descriptor
+ *             the buffer to save the data in
+ *             the size of the buffer
+ * Returns: the number of bytes stored (excluding null)
 */
+/* 读取一行http报文，以\r或\r\n结尾 */
+int get_line(int sock, char *buf, int size)
+{
+    int i = 0;
+    char c = '\0';  //'\0'表示NULL
+    int n;
+
+    //至多读取size-1个字符，最后一个字符置为'\0'
+    while ((i < size - 1) && (c != '\n'))
+    {
+        n = recv(sock, &c, 1, 0);   //单个字符接收
+                                    //客户和服务器都用recv函数从TCP连接的另一端接收数据
+                                    //第一个参数指定接收端套接字描述符；
+                                    //第二个参数指明一个缓冲区地址，该缓冲区用来存放recv函数接收到的数据
+
+        if (n > 0)  //recv接收成功
+        {
+            if (c == '\r')  //如果是回车符，则继续读取
+            {
+                //使用MSG_PEEK标志使下一次读取依然可以得到这次读取的内容，可认为接收窗口不滑动
+                n = recv(sock, &c, 1, MSG_PEEK);
+
+                if ((n > 0) && (c == '\n')) //  如果是回车换行符
+                    recv(sock, &c, 1, 0);   //继续接收单个字符，实际上和上面那个标志位MSG_PEEK读取同样的字符
+                                            //读完删除输入队列的数据，即滑动窗口，c=='\n'
+                else
+                    c = '\n';   //只是读取到回车符，则值为换行符，也终止了读取
+            }
+            buf[i] = c; //将读取到的数据放入缓冲区
+            i++;    //循环进行下一次读取
+        }
+        else    //没有读到任何数据
+            c = '\n';
+    }
+    buf[i] = '\0';
+
+    return(i);  //返回读取到的字符个数（包括'\0'）
+}
 
 /************** headers ****************/
-/*
-
+/* Return the informational HTTP headers about a file.
+ * Parameters: the socket to print the headers on the
+ * name of the file
 */
+/* */
+void headers(int client, const char *filename)
+{
+    char buf[1024];
+    (void)filename; //(void)var 的作用是：避免未使用变量的编译警告
+
+    strcpy(buf, "HTTP/1.0 200 OK\r\n");
+    send(client, buf, strlen(buf), 0);
+    strcpy(buf, SERVER_STRING);         //SERVER_STRING为define的server名字
+    send(client, buf, strlen(buf), 0);
+    strcpy(buf, "Content-Type: text/html\r\n");
+    send(client, buf, strlen(buf), 0);
+    strcpy(buf, "\r\n");
+    send(client, buf, strlen(buf), 0);
+}
 
 /************** not_found ****************/
-/*
-
+/* Give a client a 404 not found status message
 */
+/* 返回404 */
+void not_found(int client)
+{
+    char buf[1024];
+    //返回404
+    sprintf(buf, "HTTP/1.0 404 NOT FOUND\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, SERVER_STRING);
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "Conent-type: text/html\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "<HTML><TITLE>Not Found</TITLE>\r\n");
+    send(cliend, buf, strlen(buf), 0);
+    sprintf(buf, "<BODY><P>The server could not fulfill\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "your request because the resource specified\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "is unavailable or nonexistent.\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "</BODY></HTML>\r\n");
+    send(client, buf, strlen(buf), 0);
+}
+
 
 /************** serve_file ****************/
-/*
-
+/* Send a regular file to the client. Use headers, and report
+ * errors to client if they occur.
+ * Parameters: a pointer to a file structure produced from the socket
+ *             file descriptor
+ *             the name of the file to serve
 */
+/* 将请求的文件发送回client */
+void serve_file(int client, const char *filename)
+{
+    FILE *resource = NULL;
+    int numchars = 1;
+    char buf[1024];
+
+    buf[0] = 'A';
+    buf[1] = '\0';  //这两个不知道是干什么的
+    while ((numchars > 0) && strcmp("\n", buf))     //read & discard headers
+        numchars = get_line(client, buf, sizeof(buf));      //按行读取值client
+
+    resource = fopen(filename, "r");    //以只读形式打开文件
+                                        //fopen打开文件，并返回文件指针（FILE*）
+    if (resource == NULL)
+        not_found(client);  //如果文件不存在，调用not_found返回404
+    else
+    {
+        headers(client, filename);  //先返回文件头部信息，即正常读取文件200
+        cat(client, resource);      //将resource描述符指定文件中的数据发送给client
+    }
+    fclose(resource);   //关闭
+}
 
 /************** startup ****************/
 /* This function starts the process of listening for web connections
@@ -192,9 +330,32 @@ int startup(u_short *port)
 }
 
 /************* unimplemented **************/
-/*
-
+/* Inform the client that the requested web method has not been
+ * implemented.
+ * Parameter: the client socket
 */
+/* 通知client所提出的请求方法不被服务器支持 */
+void unimplemented(int client)
+{
+    char buf[1024];
+    //发送501表示相应方法未实现
+    sprintf(buf, "HTTP/1.0 501 Method Not Implemented\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, SERVER_STRING);
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "Content-Type: text/html\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "<HTML><HEAD><TITLE>Method Not Implemented\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "</TITLE></HEAD>\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "<BODY><P>HTTP request method not supported.\r\n");
+    send(cliend, buf, strlen(buf), 0);
+    sprintf(buf, "</BODY></HTML>\r\n");
+    send(client, buf, strlen(buf), 0);
+}
 
 int main()
 {
