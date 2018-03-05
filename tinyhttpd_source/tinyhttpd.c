@@ -59,9 +59,34 @@ void unimplemented(int);    //返回给浏览器表明收到的http请求所用的method不被支持
 */
 
 /************** cat ****************/
-/*
-
+/* Put the entire contents of a file out on a socket. This function
+ * is named after the UNIX "cat" command, because it might have been
+ * easier just to do something like pipe, fork, and exec("cat").
+ * Parameters: the client socket descriptor
+                FILE pointer for the file to cat
 */
+/* 将文件结构指针resource中的数据发送至client */
+void cat(int client, FILE *resource)
+{
+    //发送文件的内容
+    char buf[1024];
+    //读取文件到buf中
+    fgets(buf, sizeof(buf), resource);
+    while (!feof(resource)) //判断文件是否读取到末尾；feof函数检测流上的文件结束符，如文件结束返回非0值
+    {
+        //将文件流中的字符全部发送给client
+        send(client, buf, strlen(buf), 0);        //客户和服务器都是以send函数向TCP连接的另一端发送数据
+                                                  //第一个参数为发送端套接字，第四个参数一般为0
+
+        fgets(buf, sizeof(buf), resource);
+
+        /* 从文件结构体指针resource中读取至多bufsize-1个数据（'\0'）
+         * 每次读取一行，如果不足bufsize，则读取完该行结束。
+         * 通过feof函数判断fgets是否因出错而终止
+         * 另外，这里有文件偏移位置，下一轮读取会从上一轮读取完的位置继续
+        */
+    }
+}
 
 /************** cannot_execute ****************/
 /*
