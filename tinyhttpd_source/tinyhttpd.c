@@ -54,9 +54,25 @@ void unimplemented(int);    //返回给浏览器表明收到的http请求所用的method不被支持
 */
 
 /************** bad_request ****************/
-/*
-
+/* Inform the client that a request it has made has a problem.
+ * Parameters: client socket
 */
+/* 返回给客户端这时错误请求，400响应码 */
+void bad_request(int client)
+{
+    char buf[1024];
+    //发送400，及相关信息
+    sprintf(buf, "HTTP/1.0 400 BAD REWUEST\r\n");   //sprintf将格式化的数据写入字符串
+    send(client, buf, sizeof(buf), 0);      //将buf发送给client
+    sprintf(buf, "Content-type: text/html\r\n");
+    send(client, buf, sizeof(buf), 0);
+    sprintf(buf, "\r\n");
+    send(client, buf, sizeof(buf), 0);
+    sprintf(buf, "<P>Your browser sent a bad request, ");
+    send(client, buf, sizeof(buf), 0);
+    sprintf(buf, "such as a POST without a Cotent-Length.\r\n");
+    send(client, buf, sizeof(buf), 0);
+}
 
 /************** cat ****************/
 /* Put the entire contents of a file out on a socket. This function
