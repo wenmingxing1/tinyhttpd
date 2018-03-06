@@ -235,9 +235,139 @@ void error_die(const char *sc)
 }
 
 /************** execute_cgi ****************/
-/*
-
+/* Execute a cgi script. Will need to set environment variables as
+ * appropriate.
+ * Parameters: client socket descriptor
+               path to the cgi script
 */
+/* 执行cgi(公共网卡接口)脚本，需要设定合适的环境变量 */
+/* execute_cgi函数负责将请求传递给cgi程序处理，
+ * 服务器与cgi之间通过管道pipe通信，首先初始化两个管道，并创建子进程执行cgi函数
+ * 子进程执行cgi程序，获取cgi的标准输出通过管道传给父进程，由父进程发送给客户端
+*/
+void execute_cgi(int client, const char *path const char *method, const char *query_string)
+{
+    char buf[1024];
+    int cgi_output[2];
+    int cgi_input[2];
+    pid_t pid;
+    int status;
+    int i;
+    char c;
+    int numchars = 1;
+    int content_length = -1;
+
+    buf[0] = 'A'; buf[1] = '\0';
+    if (strcasecmp(method, "GET") == 0)     //GET方法：一般用于获取/查询资源信息
+        while ((numchars > 0) && strcmp("\n", buf)) //读取并丢弃头部信息
+            numchars = get_line(client, buf, sizeof(buf));  //从客户端读取
+    else    //POST方法，一般用于更新资源信息
+    {
+        numchars = get_line(client, buf, sizeof(buf));
+
+        //获取HTTP消息实体的传输长度
+        while ((numchars > 0) && strcmp("\n", buf)) //不空，且不为换行符
+        {
+            buf[15] = '\0';
+            if (strcasecmp(buf, "Content_Length:") == 0)    //是否为Content_Length字段
+                content_length = atoi(&buf[16]);    //Content_Length用于描述HTTP消息实体的传输长度
+            numchars = get_line(client, buf, sizeof(buf));
+        }
+        if (content_length == -1)
+        {
+            bad_request(client);    //请求的页面数据为空，没有数据，就是我们打开网页经常出现的空白页面
+            return;
+        }
+    }
+
+    sprintf(buf, "HTTP/1.0 200 OK\r\n");
+    send(client, buf, strlen(buf), 0);
+
+    //pipe函数建立管道，成功返回0，参数数组包含pipe使用的两个文件的描述符，fd[0]:读入端，fd[1]:写入端
+    //必须在fork中调用pipe，否则子进程不会继承文件描述符。
+    if (pipe(cgi_output) < 0)
+    {
+        cannot_execute(client); //管道建立失败
+        return;
+    }   //管道只能具有公共祖先的进程间进行，这里是父子进程之间
+    if (pipe(cgi_input) < 0)
+    {
+        cannot_execute(client);
+        return;
+    }
+
+    //fork子进程，这样创建了父子进程间的IPC(进程间通信)通道
+    if ((pid = fork()) < 0)
+    {
+        cannot_execute(client);     //创建失败
+        return;
+    }
+
+    /* 实现进程间的管道通信机制 */
+    //子进程继承了父进程的pipe，然后通过关闭子进程output管道的输出端，input管道的读入端；
+    //关闭父进程output管道的写入端，input管道的输出端
+    //子进程
+    if (pid == 0)   //这是子进程，用于执行cgi脚本程序
+    {
+        char meth_env[255];
+        char query_env[255];
+        char length_env[255];
+
+        //复制文件句柄，重定向进程的标准输入输出
+        //dup2函数在管道实现进程间通信中重定向文件描述符
+        dup2(cgi_output[1], 1); // 1表示stdout，0表示stdin，将系统标准输出重定向为cgi_output[1]
+        dup2(cgi_input[0], 0);  //将系统标准输入重定向为cgi_input[0]
+        close(cgi_output[0]);   //关闭cgi_output中的读入端
+        close(cgi_input[1]);    //关闭cgi_input中的输出端
+
+        //cgi标准需要将请求的方法存储到环境变量中，然后和cgi脚本进行交互
+        sprintf(meth_env, "REQUEST_METHOD=%s", method);
+        putenv(meth_env);       //putenv函数的作用是增加环境变量
+
+        if (strcasecmp(method, "GET") == 0) //get
+        {
+            //设置query_string的环境变量
+            sprintf(query_env, "QUERY_STRING=%s", query_string);
+            putenv(query_env);
+        }
+        else    //post
+        {
+            //设置content_Length的环境变量
+            sprintf(length_env, "CONTENT_LENGTH=%d", content_length);
+            putenv(length_env);
+        }
+        execl(path, paht, NULL);    //exec函数簇，执行cgi脚本，获取cgi的标准输出作为相应内容发送给客户端
+        //因为通过dup2完成了重定向，标准输出内容进入管道output的输入端
+
+        exit(0);    //子进程退出
+    }
+    else    //如果是父进程
+    {
+        close(cgi_output[1]);   //关闭cgi_output中的写入通道，注意这里是父进程的cgi_output变量，和子进程区分开
+        close(cgi_input[0]);    //关闭cgi_input的输出通道
+        /* 通过关闭对应管道的端口通道，然后重定向子进程的某端，这样就在父子进程之间构建了一条单双工通道
+         * 如果不进行重定向，将是一条典型的全双工管道通信机制
+        */
+        if (strcasecmp(method, "POST") == 0)    //post方式，将指定好的传输长度字符发送
+            /* 接收post过来的数据 */
+        for (i = 0; i < content_length; i++)
+        {
+            recv(client, &c, 1, 0); //从客户端接收单个字符
+            write(cgi_input[1], &c, 1); //写入cgi_input的in通道
+            //数据传送过程：input[1](parent) --> input[0](child)[执行cgi函数] --> STDIN --> STDOUT
+            // --> output[1](child) -- > output[0](parent)[将结果发送给客户端]
+
+        }
+        while (read(cgi_output[0], &c, 1) > 0)  //读取输出内容到客户端
+            send(client, &c, 1, 0); //
+
+        close(cgi_output[0]);   //关闭剩下的管道端
+        close(cgi_input[1]);
+        waitpid(pid, &status, 0);   //等待子进程终止
+    }
+
+}
+
 
 /************** get_line ****************/
 /* Get a line from a socket, whether the line ends in a newline,
