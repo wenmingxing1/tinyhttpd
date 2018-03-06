@@ -304,8 +304,11 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
     }
 
     /* 实现进程间的管道通信机制 */
-    //子进程继承了父进程的pipe，然后通过关闭子进程output管道的输出端，input管道的读入端；
-    //关闭父进程output管道的写入端，input管道的输出端
+    //子进程继承了父进程的pipe，然后通过关闭子进程output管道的out端，input管道的in端；
+    //关闭父进程output管道的in端，input管道的out端
+    //管道分为有名管道和无名管道，这里使用的是无名管道，
+    //两个进程若不存在共享祖先进程则不能使用无名管道，这里是父子进程的关系
+    //有名管道可以在一个系统中的任意两个进程之间通信
     //子进程
     if (pid == 0)   //这是子进程，用于执行cgi脚本程序
     {
@@ -317,8 +320,8 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
         //dup2函数在管道实现进程间通信中重定向文件描述符
         dup2(cgi_output[1], 1); // 1表示stdout，0表示stdin，将系统标准输出重定向为cgi_output[1]
         dup2(cgi_input[0], 0);  //将系统标准输入重定向为cgi_input[0]
-        close(cgi_output[0]);   //关闭cgi_output中的读入端
-        close(cgi_input[1]);    //关闭cgi_input中的输出端
+        close(cgi_output[0]);   //关闭cgi_output中的out端
+        close(cgi_input[1]);    //关闭cgi_input中的in端
 
         //cgi标准需要将请求的方法存储到环境变量中，然后和cgi脚本进行交互
         sprintf(meth_env, "REQUEST_METHOD=%s", method);
@@ -343,8 +346,8 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
     }
     else    //如果是父进程
     {
-        close(cgi_output[1]);   //关闭cgi_output中的写入通道，注意这里是父进程的cgi_output变量，和子进程区分开
-        close(cgi_input[0]);    //关闭cgi_input的输出通道
+        close(cgi_output[1]);   //关闭cgi_output中的in通道，注意这里是父进程的cgi_output变量，和子进程区分开
+        close(cgi_input[0]);    //关闭cgi_input的out通道
         /* 通过关闭对应管道的端口通道，然后重定向子进程的某端，这样就在父子进程之间构建了一条单双工通道
          * 如果不进行重定向，将是一条典型的全双工管道通信机制
         */
