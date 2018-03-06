@@ -31,7 +31,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="tinyhttpd.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>

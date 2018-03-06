@@ -54,6 +54,101 @@ void unimplemented(int);    //返回给浏览器表明收到的http请求所用的method不被支持
  * return. Process the request appropriately.
  * Parameters: the socket connected to the client
 */
+/* HTTP协议规定，请求从客户端发出，最后服务器响应该请求并返回。
+ * 这是目前HTTP协议的规定，服务器不支持主动响应，所以目前的HTTP
+ * 协议版本都是基于客户端请求，然后响应的这种模型
+*/
+/* accept_request函数解析客户端请求，判断是请求静态文件还是cgi代码
+ * （通过请求类型以及参数判断）。如果是静态文件则将文件输出给前端，
+ * 如果是cgi则进入cgi处理函数。
+*/
+void accept_request(int client)
+{
+    char buf[1024];
+    int numchars;
+    char method[255];   //请求方法，GET或POST
+    char url[255];  //请求的文件路径
+    char path[512]; //文件的相对路径
+    size_t i, j;
+    struct stat st;     //stat结构体是用来描述一个linux系统文件中文件属性的结构
+    int cgi = 0;    //cgi标志位，用于判断是否是动态请求
+
+    char *query_string = NULL;
+
+    numchars = get_line(client, buf, sizeof(buf));  //从client中读取指定大小http数据到buf
+    i = 0; j = 0;
+    //接收客户端的http请求报文
+    //接收字符处理：提取空格字符前的字符，至多254个
+    while(!Isspace(buf[j]) && (i < sizeof(method) - 1))
+    {
+        method[i] = buf[j];     //根据http请求报文格式，这里得到的是请求方法
+        i++; j++;
+    }
+    method[i] = '\0';
+
+    //忽略大小写比较字符串，判断使用的是那种请求方法
+    if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
+    {
+        unimplemented(client);  //两种支持的方法都不是，告知客户端所请求的方法未能实现
+        return;
+    }
+
+    if (strcasecmp(method, "POST") == 0)    //如果是POST方法
+        cgi = 1;    //设置标志位，Post表示是动态请求
+
+    i = 0;
+    while (ISspace(buf[j]) && j < sizeof(buf))  //过滤掉空格字符
+        j++;
+
+    while (ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < sizeof(buf)))
+    {
+        url[i] = buf[j];    //得到URL(互联网标准资源的地址)
+        i++; j++;
+    }
+    url[i] = '\0';
+
+    if (strcasecmp(method, "GET") == 0)     //如果方法是get
+    {
+        query_string = url;     //请求信息
+        while ((*query_string != '?') && (*query_string != '\0'))   //跳过？前面的字符
+            query_string++; //问号前面是路径，后面是参数
+        if (*query_string == '?')   //得到问号，表明是动态请求
+        {
+            cgi = 1;
+            *query_string = '\0';
+            query_string++;     //此时指针指向问号的下一位
+        }
+    }
+
+    //下面是项目中htdocs文件下的文件
+    sprintf(path, "htdocs%s", url); //获取请求文件路径
+    if (path[strlen(path) - 1 == '/')   //如果文件类型是目录(/)，则加上index.html
+        strcat(path, "index.html");
+
+    //根据路径找文件，并获取path文件信息保存到结构体st中，这就是函数stat的作用
+    if (stat(path, &st) == -1)  //如果失败
+    {
+        //丢弃headers的信息
+        while (numchars > 0 && strcmp("\n", buf))   //
+            numchars = get_line(client, buf, sizeof(buf));  //
+        not_found(client);  //回应客户端找不到
+    }
+    else    //如果文件信息获取成功
+    {
+        //如果是个目录，则默认使用该目录下index.html文件，stat结构体中的st_mode用于判断文件类型
+        if ((st.st_mode & S_IFMT) == S_IFDIR)
+            strcat(path, "/index.html");
+        if ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH))
+            cgi = 1;
+
+        if (!cgi)   //静态页面请求
+            serve_file(client, path);   //直接返回文件信息给客户端，静态页面返回
+        else //动态页面请求
+            execute_cgi(client, path, method, query_string);    //执行cgi脚本
+    }
+
+    close(client);  //关闭客户端socket
+}
 
 /************** bad_request ****************/
 /* Inform the client that a request it has made has a problem.
@@ -201,7 +296,7 @@ int get_line(int sock, char *buf, int size)
  * Parameters: the socket to print the headers on the
  * name of the file
 */
-/* */
+/* 成功返回http响应头部信息 */
 void headers(int client, const char *filename)
 {
     char buf[1024];
