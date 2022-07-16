@@ -9,9 +9,9 @@
 */
 
 /* logs */
-/* 2018-3-4 ¿ªÊ¼×¢ÊÍ£¬²¢Íê³Émainº¯ÊıµÄ×¢ÊÍ¡£
- * 2018-3-5 Íê³ÉºËĞÄº¯Êıstartup£¬°üÀ¨socket´´½¨£¬°ó¶¨£¬¼àÌı£»
-            Íê³ÉËùÓĞ¸¨Öúº¯Êı¡£
+/* 2018-3-4 å¼€å§‹æ³¨é‡Šï¼Œå¹¶å®Œæˆmainå‡½æ•°çš„æ³¨é‡Šã€‚
+ * 2018-3-5 å®Œæˆæ ¸å¿ƒå‡½æ•°startupï¼ŒåŒ…æ‹¬socketåˆ›å»ºï¼Œç»‘å®šï¼Œç›‘å¬ï¼›
+            å®Œæˆæ‰€æœ‰è¾…åŠ©å‡½æ•°ã€‚
 
 */
 
@@ -30,137 +30,137 @@
 #include<stdlib.h>
 
 #define ISspace(x) isspace((int)(x))
-//º¯ÊıËµÃ÷£º¼ì²é²ÎÊıcÊÇ·ñÎª¿Õ¸ñ×Ö·û
-//Ò²¾ÍÊÇÅĞ¶ÏÊÇ·ñÎª¿Õ¸ñ(' ')£¬¶¨Î»×Ö·û('\t')£¬CR('\r'),»»ĞĞ('\n')µÈÇé¿ö
-//·µ»ØÖµ£ºÈôcÎª¿Õ°××Ö·û£¬Ôò·µ»Ø·Ç0£¬·ñÔò·µ»Ø0
+//å‡½æ•°è¯´æ˜ï¼šæ£€æŸ¥å‚æ•°cæ˜¯å¦ä¸ºç©ºæ ¼å­—ç¬¦
+//ä¹Ÿå°±æ˜¯åˆ¤æ–­æ˜¯å¦ä¸ºç©ºæ ¼(' ')ï¼Œå®šä½å­—ç¬¦('\t')ï¼ŒCR('\r'),æ¢è¡Œ('\n')ç­‰æƒ…å†µ
+//è¿”å›å€¼ï¼šè‹¥cä¸ºç©ºç™½å­—ç¬¦ï¼Œåˆ™è¿”å›é0ï¼Œå¦åˆ™è¿”å›0
 
-#define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"      //¶¨ÒåserverÃû³Æ
+#define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"      //å®šä¹‰serveråç§°
 
-void accept_request(int);   //´¦Àí´ÓÌ×½Ó×ÖÉÏ¼àÌıµ½µÄÒ»¸öhttpÇëÇó
-void bad_request(int);  //·µ»Ø¸ø¿Í»§¶ËÕâÊÇ¸ö´íÎóÇëÇó£¬400ÏìÓ¦Âë
-void cat(int, FILE *);  //¶ÁÈ¡·şÎñÆ÷ÉÏÄ³¸öÎÄ¼ş(FILE) Ğ´µ½socketÌ×½Ó×Ö(int)
-void cannot_execute(int);   //´¦Àí·¢ÉúÔÚÖ´ĞĞcgi³ÌĞòÊ±³öÏÖµÄ´íÎó£¬cgiÎªÍ¨ÓÃÍø¹Ø½Ó¿Ú¼¼Êõ£¬¿ÉÒÔÈÃÒ»¸ö¿Í»§¶Ë£¬´ÓÍøÒ³ä¯ÀÀÆ÷ÏòÖ´ĞĞÔÚ·şÎñÆ÷ÉÏµÄ³ÌĞòÇëÇóÊı¾İ
-void error_die(const char *);   //½«´íÎóĞÅÏ¢Ğ´µ½perror
-void execute_cgi(int, const char *, const char *, const char *);    //ÔËĞĞcgi½Å±¾£¬Éæ¼°µ½¶¯Ì¬½âÎö
-int get_line(int, char *, int); //¶ÁÈ¡Ò»ĞĞhttp±¨ÎÄ
-void headers(int, const char *);    //·µ»ØhttpÏàÓ¦Í·
-void not_found(int);    //·µ»ØÕÒ²»µ½ÇëÇóÎÄ¼ş
-void serve_file(int, const char *); //µ÷ÓÃcat£¬½«·şÎñÆ÷ÎÄ¼şÄÚÈİ·µ»Ø¸øä¯ÀÀÆ÷
-int startup(u_short *); //¿ªÆôhttp·şÎñ£¬°üÀ¨°ó¶¨¶Ë¿Ú£¬¼àÌı£¬¿ªÆôÏß³Ì´¦ÀíÁ´½Ó
-void unimplemented(int);    //·µ»Ø¸øä¯ÀÀÆ÷±íÃ÷ÊÕµ½µÄhttpÇëÇóËùÓÃµÄmethod²»±»Ö§³Ö
+void accept_request(int);   //å¤„ç†ä»å¥—æ¥å­—ä¸Šç›‘å¬åˆ°çš„ä¸€ä¸ªhttpè¯·æ±‚
+void bad_request(int);  //è¿”å›ç»™å®¢æˆ·ç«¯è¿™æ˜¯ä¸ªé”™è¯¯è¯·æ±‚ï¼Œ400å“åº”ç 
+void cat(int, FILE *);  //è¯»å–æœåŠ¡å™¨ä¸ŠæŸä¸ªæ–‡ä»¶(FILE) å†™åˆ°socketå¥—æ¥å­—(int)
+void cannot_execute(int);   //å¤„ç†å‘ç”Ÿåœ¨æ‰§è¡Œcgiç¨‹åºæ—¶å‡ºç°çš„é”™è¯¯ï¼Œcgiä¸ºé€šç”¨ç½‘å…³æ¥å£æŠ€æœ¯ï¼Œå¯ä»¥è®©ä¸€ä¸ªå®¢æˆ·ç«¯ï¼Œä»ç½‘é¡µæµè§ˆå™¨å‘æ‰§è¡Œåœ¨æœåŠ¡å™¨ä¸Šçš„ç¨‹åºè¯·æ±‚æ•°æ®
+void error_die(const char *);   //å°†é”™è¯¯ä¿¡æ¯å†™åˆ°perror
+void execute_cgi(int, const char *, const char *, const char *);    //è¿è¡Œcgiè„šæœ¬ï¼Œæ¶‰åŠåˆ°åŠ¨æ€è§£æ
+int get_line(int, char *, int); //è¯»å–ä¸€è¡ŒhttpæŠ¥æ–‡
+void headers(int, const char *);    //è¿”å›httpç›¸åº”å¤´
+void not_found(int);    //è¿”å›æ‰¾ä¸åˆ°è¯·æ±‚æ–‡ä»¶
+void serve_file(int, const char *); //è°ƒç”¨catï¼Œå°†æœåŠ¡å™¨æ–‡ä»¶å†…å®¹è¿”å›ç»™æµè§ˆå™¨
+int startup(u_short *); //å¼€å¯httpæœåŠ¡ï¼ŒåŒ…æ‹¬ç»‘å®šç«¯å£ï¼Œç›‘å¬ï¼Œå¼€å¯çº¿ç¨‹å¤„ç†é“¾æ¥
+void unimplemented(int);    //è¿”å›ç»™æµè§ˆå™¨è¡¨æ˜æ”¶åˆ°çš„httpè¯·æ±‚æ‰€ç”¨çš„methodä¸è¢«æ”¯æŒ
 
 /************** accept_request ****************/
 /* A request has caused a call to accept() on the server port to
  * return. Process the request appropriately.
  * Parameters: the socket connected to the client
 */
-/* HTTPĞ­Òé¹æ¶¨£¬ÇëÇó´Ó¿Í»§¶Ë·¢³ö£¬×îºó·şÎñÆ÷ÏìÓ¦¸ÃÇëÇó²¢·µ»Ø¡£
- * ÕâÊÇÄ¿Ç°HTTPĞ­ÒéµÄ¹æ¶¨£¬·şÎñÆ÷²»Ö§³ÖÖ÷¶¯ÏìÓ¦£¬ËùÒÔÄ¿Ç°µÄHTTP
- * Ğ­Òé°æ±¾¶¼ÊÇ»ùÓÚ¿Í»§¶ËÇëÇó£¬È»ºóÏìÓ¦µÄÕâÖÖÄ£ĞÍ
+/* HTTPåè®®è§„å®šï¼Œè¯·æ±‚ä»å®¢æˆ·ç«¯å‘å‡ºï¼Œæœ€åæœåŠ¡å™¨å“åº”è¯¥è¯·æ±‚å¹¶è¿”å›ã€‚
+ * è¿™æ˜¯ç›®å‰HTTPåè®®çš„è§„å®šï¼ŒæœåŠ¡å™¨ä¸æ”¯æŒä¸»åŠ¨å“åº”ï¼Œæ‰€ä»¥ç›®å‰çš„HTTP
+ * åè®®ç‰ˆæœ¬éƒ½æ˜¯åŸºäºå®¢æˆ·ç«¯è¯·æ±‚ï¼Œç„¶åå“åº”çš„è¿™ç§æ¨¡å‹
 */
-/* accept_requestº¯Êı½âÎö¿Í»§¶ËÇëÇó£¬ÅĞ¶ÏÊÇÇëÇó¾²Ì¬ÎÄ¼ş»¹ÊÇcgi´úÂë
- * £¨Í¨¹ıÇëÇóÀàĞÍÒÔ¼°²ÎÊıÅĞ¶Ï£©¡£Èç¹ûÊÇ¾²Ì¬ÎÄ¼şÔò½«ÎÄ¼şÊä³ö¸øÇ°¶Ë£¬
- * Èç¹ûÊÇcgiÔò½øÈëcgi´¦Àíº¯Êı¡£
+/* accept_requestå‡½æ•°è§£æå®¢æˆ·ç«¯è¯·æ±‚ï¼Œåˆ¤æ–­æ˜¯è¯·æ±‚é™æ€æ–‡ä»¶è¿˜æ˜¯cgiä»£ç 
+ * ï¼ˆé€šè¿‡è¯·æ±‚ç±»å‹ä»¥åŠå‚æ•°åˆ¤æ–­ï¼‰ã€‚å¦‚æœæ˜¯é™æ€æ–‡ä»¶åˆ™å°†æ–‡ä»¶è¾“å‡ºç»™å‰ç«¯ï¼Œ
+ * å¦‚æœæ˜¯cgiåˆ™è¿›å…¥cgiå¤„ç†å‡½æ•°ã€‚
 */
 void accept_request(int client)
 {
     char buf[1024];
     int numchars;
-    char method[255];   //ÇëÇó·½·¨£¬GET»òPOST
-    char url[255];  //ÇëÇóµÄÎÄ¼şÂ·¾¶
-    char path[512]; //ÎÄ¼şµÄÏà¶ÔÂ·¾¶
+    char method[255];   //è¯·æ±‚æ–¹æ³•ï¼ŒGETæˆ–POST
+    char url[255];  //è¯·æ±‚çš„æ–‡ä»¶è·¯å¾„
+    char path[512]; //æ–‡ä»¶çš„ç›¸å¯¹è·¯å¾„
     size_t i, j;
-    struct stat st;     //stat½á¹¹ÌåÊÇÓÃÀ´ÃèÊöÒ»¸ölinuxÏµÍ³ÎÄ¼şÖĞÎÄ¼şÊôĞÔµÄ½á¹¹
-    int cgi = 0;    //cgi±êÖ¾Î»£¬ÓÃÓÚÅĞ¶ÏÊÇ·ñÊÇ¶¯Ì¬ÇëÇó
+    struct stat st;     //statç»“æ„ä½“æ˜¯ç”¨æ¥æè¿°ä¸€ä¸ªlinuxç³»ç»Ÿæ–‡ä»¶ä¸­æ–‡ä»¶å±æ€§çš„ç»“æ„
+    int cgi = 0;    //cgiæ ‡å¿—ä½ï¼Œç”¨äºåˆ¤æ–­æ˜¯å¦æ˜¯åŠ¨æ€è¯·æ±‚
 
     char *query_string = NULL;
 
-    numchars = get_line(client, buf, sizeof(buf));  //´ÓclientÖĞ¶ÁÈ¡Ö¸¶¨´óĞ¡httpÊı¾İµ½buf
+    numchars = get_line(client, buf, sizeof(buf));  //ä»clientä¸­è¯»å–æŒ‡å®šå¤§å°httpæ•°æ®åˆ°buf
     i = 0; j = 0;
-    //½ÓÊÕ¿Í»§¶ËµÄhttpÇëÇó±¨ÎÄ
-    //½ÓÊÕ×Ö·û´¦Àí£ºÌáÈ¡¿Õ¸ñ×Ö·ûÇ°µÄ×Ö·û£¬ÖÁ¶à254¸ö
+    //æ¥æ”¶å®¢æˆ·ç«¯çš„httpè¯·æ±‚æŠ¥æ–‡
+    //æ¥æ”¶å­—ç¬¦å¤„ç†ï¼šæå–ç©ºæ ¼å­—ç¬¦å‰çš„å­—ç¬¦ï¼Œè‡³å¤š254ä¸ª
     while(!Isspace(buf[j]) && (i < sizeof(method) - 1))
     {
-        method[i] = buf[j];     //¸ù¾İhttpÇëÇó±¨ÎÄ¸ñÊ½£¬ÕâÀïµÃµ½µÄÊÇÇëÇó·½·¨
+        method[i] = buf[j];     //æ ¹æ®httpè¯·æ±‚æŠ¥æ–‡æ ¼å¼ï¼Œè¿™é‡Œå¾—åˆ°çš„æ˜¯è¯·æ±‚æ–¹æ³•
         i++; j++;
     }
     method[i] = '\0';
 
-    //ºöÂÔ´óĞ¡Ğ´±È½Ï×Ö·û´®£¬ÅĞ¶ÏÊ¹ÓÃµÄÊÇÄÇÖÖÇëÇó·½·¨
+    //å¿½ç•¥å¤§å°å†™æ¯”è¾ƒå­—ç¬¦ä¸²ï¼Œåˆ¤æ–­ä½¿ç”¨çš„æ˜¯é‚£ç§è¯·æ±‚æ–¹æ³•
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
-        unimplemented(client);  //Á½ÖÖÖ§³ÖµÄ·½·¨¶¼²»ÊÇ£¬¸æÖª¿Í»§¶ËËùÇëÇóµÄ·½·¨Î´ÄÜÊµÏÖ
+        unimplemented(client);  //ä¸¤ç§æ”¯æŒçš„æ–¹æ³•éƒ½ä¸æ˜¯ï¼Œå‘ŠçŸ¥å®¢æˆ·ç«¯æ‰€è¯·æ±‚çš„æ–¹æ³•æœªèƒ½å®ç°
         return;
     }
 
-    if (strcasecmp(method, "POST") == 0)    //Èç¹ûÊÇPOST·½·¨
-        cgi = 1;    //ÉèÖÃ±êÖ¾Î»£¬Post±íÊ¾ÊÇ¶¯Ì¬ÇëÇó
+    if (strcasecmp(method, "POST") == 0)    //å¦‚æœæ˜¯POSTæ–¹æ³•
+        cgi = 1;    //è®¾ç½®æ ‡å¿—ä½ï¼ŒPostè¡¨ç¤ºæ˜¯åŠ¨æ€è¯·æ±‚
 
     i = 0;
-    while (ISspace(buf[j]) && j < sizeof(buf))  //¹ıÂËµô¿Õ¸ñ×Ö·û
+    while (ISspace(buf[j]) && j < sizeof(buf))  //è¿‡æ»¤æ‰ç©ºæ ¼å­—ç¬¦
         j++;
 
     while (ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < sizeof(buf)))
     {
-        url[i] = buf[j];    //µÃµ½URL(»¥ÁªÍø±ê×¼×ÊÔ´µÄµØÖ·)
+        url[i] = buf[j];    //å¾—åˆ°URL(äº’è”ç½‘æ ‡å‡†èµ„æºçš„åœ°å€)
         i++; j++;
     }
     url[i] = '\0';
 
-    if (strcasecmp(method, "GET") == 0)     //Èç¹û·½·¨ÊÇget
+    if (strcasecmp(method, "GET") == 0)     //å¦‚æœæ–¹æ³•æ˜¯get
     {
-        query_string = url;     //ÇëÇóĞÅÏ¢
-        while ((*query_string != '?') && (*query_string != '\0'))   //Ìø¹ı£¿Ç°ÃæµÄ×Ö·û
-            query_string++; //ÎÊºÅÇ°ÃæÊÇÂ·¾¶£¬ºóÃæÊÇ²ÎÊı
-        if (*query_string == '?')   //µÃµ½ÎÊºÅ£¬±íÃ÷ÊÇ¶¯Ì¬ÇëÇó
+        query_string = url;     //è¯·æ±‚ä¿¡æ¯
+        while ((*query_string != '?') && (*query_string != '\0'))   //è·³è¿‡ï¼Ÿå‰é¢çš„å­—ç¬¦
+            query_string++; //é—®å·å‰é¢æ˜¯è·¯å¾„ï¼Œåé¢æ˜¯å‚æ•°
+        if (*query_string == '?')   //å¾—åˆ°é—®å·ï¼Œè¡¨æ˜æ˜¯åŠ¨æ€è¯·æ±‚
         {
             cgi = 1;
             *query_string = '\0';
-            query_string++;     //´ËÊ±Ö¸ÕëÖ¸ÏòÎÊºÅµÄÏÂÒ»Î»
+            query_string++;     //æ­¤æ—¶æŒ‡é’ˆæŒ‡å‘é—®å·çš„ä¸‹ä¸€ä½
         }
     }
 
-    //ÏÂÃæÊÇÏîÄ¿ÖĞhtdocsÎÄ¼şÏÂµÄÎÄ¼ş
-    sprintf(path, "htdocs%s", url); //»ñÈ¡ÇëÇóÎÄ¼şÂ·¾¶
-    if (path[strlen(path) - 1 == '/')   //Èç¹ûÎÄ¼şÀàĞÍÊÇÄ¿Â¼(/)£¬Ôò¼ÓÉÏindex.html
+    //ä¸‹é¢æ˜¯é¡¹ç›®ä¸­htdocsæ–‡ä»¶ä¸‹çš„æ–‡ä»¶
+    sprintf(path, "htdocs%s", url); //è·å–è¯·æ±‚æ–‡ä»¶è·¯å¾„
+    if (path[strlen(path) - 1 == '/')   //å¦‚æœæ–‡ä»¶ç±»å‹æ˜¯ç›®å½•(/)ï¼Œåˆ™åŠ ä¸Šindex.html
         strcat(path, "index.html");
 
-    //¸ù¾İÂ·¾¶ÕÒÎÄ¼ş£¬²¢»ñÈ¡pathÎÄ¼şĞÅÏ¢±£´æµ½½á¹¹ÌåstÖĞ£¬Õâ¾ÍÊÇº¯ÊıstatµÄ×÷ÓÃ
-    if (stat(path, &st) == -1)  //Èç¹ûÊ§°Ü
+    //æ ¹æ®è·¯å¾„æ‰¾æ–‡ä»¶ï¼Œå¹¶è·å–pathæ–‡ä»¶ä¿¡æ¯ä¿å­˜åˆ°ç»“æ„ä½“stä¸­ï¼Œè¿™å°±æ˜¯å‡½æ•°statçš„ä½œç”¨
+    if (stat(path, &st) == -1)  //å¦‚æœå¤±è´¥
     {
-        //¶ªÆúheadersµÄĞÅÏ¢
+        //ä¸¢å¼ƒheadersçš„ä¿¡æ¯
         while (numchars > 0 && strcmp("\n", buf))   //
             numchars = get_line(client, buf, sizeof(buf));  //
-        not_found(client);  //»ØÓ¦¿Í»§¶ËÕÒ²»µ½
+        not_found(client);  //å›åº”å®¢æˆ·ç«¯æ‰¾ä¸åˆ°
     }
-    else    //Èç¹ûÎÄ¼şĞÅÏ¢»ñÈ¡³É¹¦
+    else    //å¦‚æœæ–‡ä»¶ä¿¡æ¯è·å–æˆåŠŸ
     {
-        //Èç¹ûÊÇ¸öÄ¿Â¼£¬ÔòÄ¬ÈÏÊ¹ÓÃ¸ÃÄ¿Â¼ÏÂindex.htmlÎÄ¼ş£¬stat½á¹¹ÌåÖĞµÄst_modeÓÃÓÚÅĞ¶ÏÎÄ¼şÀàĞÍ
+        //å¦‚æœæ˜¯ä¸ªç›®å½•ï¼Œåˆ™é»˜è®¤ä½¿ç”¨è¯¥ç›®å½•ä¸‹index.htmlæ–‡ä»¶ï¼Œstatç»“æ„ä½“ä¸­çš„st_modeç”¨äºåˆ¤æ–­æ–‡ä»¶ç±»å‹
         if ((st.st_mode & S_IFMT) == S_IFDIR)
             strcat(path, "/index.html");
         if ((st.st_mode & S_IXUSR) || (st.st_mode & S_IXGRP) || (st.st_mode & S_IXOTH))
             cgi = 1;
 
-        if (!cgi)   //¾²Ì¬Ò³ÃæÇëÇó
-            serve_file(client, path);   //Ö±½Ó·µ»ØÎÄ¼şĞÅÏ¢¸ø¿Í»§¶Ë£¬¾²Ì¬Ò³Ãæ·µ»Ø
-        else //¶¯Ì¬Ò³ÃæÇëÇó
-            execute_cgi(client, path, method, query_string);    //Ö´ĞĞcgi½Å±¾
+        if (!cgi)   //é™æ€é¡µé¢è¯·æ±‚
+            serve_file(client, path);   //ç›´æ¥è¿”å›æ–‡ä»¶ä¿¡æ¯ç»™å®¢æˆ·ç«¯ï¼Œé™æ€é¡µé¢è¿”å›
+        else //åŠ¨æ€é¡µé¢è¯·æ±‚
+            execute_cgi(client, path, method, query_string);    //æ‰§è¡Œcgiè„šæœ¬
     }
 
-    close(client);  //¹Ø±Õ¿Í»§¶Ësocket
+    close(client);  //å…³é—­å®¢æˆ·ç«¯socket
 }
 
 /************** bad_request ****************/
 /* Inform the client that a request it has made has a problem.
  * Parameters: client socket
 */
-/* ·µ»Ø¸ø¿Í»§¶ËÕâÊ±´íÎóÇëÇó£¬400ÏìÓ¦Âë */
+/* è¿”å›ç»™å®¢æˆ·ç«¯è¿™æ—¶é”™è¯¯è¯·æ±‚ï¼Œ400å“åº”ç  */
 void bad_request(int client)
 {
     char buf[1024];
-    //·¢ËÍ400£¬¼°Ïà¹ØĞÅÏ¢
-    sprintf(buf, "HTTP/1.0 400 BAD REWUEST\r\n");   //sprintf½«¸ñÊ½»¯µÄÊı¾İĞ´Èë×Ö·û´®
-    send(client, buf, sizeof(buf), 0);      //½«buf·¢ËÍ¸øclient
+    //å‘é€400ï¼ŒåŠç›¸å…³ä¿¡æ¯
+    sprintf(buf, "HTTP/1.0 400 BAD REWUEST\r\n");   //sprintfå°†æ ¼å¼åŒ–çš„æ•°æ®å†™å…¥å­—ç¬¦ä¸²
+    send(client, buf, sizeof(buf), 0);      //å°†bufå‘é€ç»™client
     sprintf(buf, "Content-type: text/html\r\n");
     send(client, buf, sizeof(buf), 0);
     sprintf(buf, "\r\n");
@@ -178,25 +178,25 @@ void bad_request(int client)
  * Parameters: the client socket descriptor
                 FILE pointer for the file to cat
 */
-/* ½«ÎÄ¼ş½á¹¹Ö¸ÕëresourceÖĞµÄÊı¾İ·¢ËÍÖÁclient */
+/* å°†æ–‡ä»¶ç»“æ„æŒ‡é’ˆresourceä¸­çš„æ•°æ®å‘é€è‡³client */
 void cat(int client, FILE *resource)
 {
-    //·¢ËÍÎÄ¼şµÄÄÚÈİ
+    //å‘é€æ–‡ä»¶çš„å†…å®¹
     char buf[1024];
-    //¶ÁÈ¡ÎÄ¼şµ½bufÖĞ£¬fgets´ÓÎÄ¼ş½á¹¹ÌåÖ¸Õë(FILE *resource)ÖĞ¶ÁÈ¡Êı¾İ£¬Ã¿´Î¶ÁÈ¡Ò»ĞĞ
+    //è¯»å–æ–‡ä»¶åˆ°bufä¸­ï¼Œfgetsä»æ–‡ä»¶ç»“æ„ä½“æŒ‡é’ˆ(FILE *resource)ä¸­è¯»å–æ•°æ®ï¼Œæ¯æ¬¡è¯»å–ä¸€è¡Œ
     fgets(buf, sizeof(buf), resource);
-    while (!feof(resource)) //ÅĞ¶ÏÎÄ¼şÊÇ·ñ¶ÁÈ¡µ½Ä©Î²£»feofº¯Êı¼ì²âÁ÷ÉÏµÄÎÄ¼ş½áÊø·û£¬ÈçÎÄ¼ş½áÊø·µ»Ø·Ç0Öµ
+    while (!feof(resource)) //åˆ¤æ–­æ–‡ä»¶æ˜¯å¦è¯»å–åˆ°æœ«å°¾ï¼›feofå‡½æ•°æ£€æµ‹æµä¸Šçš„æ–‡ä»¶ç»“æŸç¬¦ï¼Œå¦‚æ–‡ä»¶ç»“æŸè¿”å›é0å€¼
     {
-        //½«ÎÄ¼şÁ÷ÖĞµÄ×Ö·ûÈ«²¿·¢ËÍ¸øclient
-        send(client, buf, strlen(buf), 0);        //¿Í»§ºÍ·şÎñÆ÷¶¼ÊÇÒÔsendº¯ÊıÏòTCPÁ¬½ÓµÄÁíÒ»¶Ë·¢ËÍÊı¾İ
-                                                  //µÚÒ»¸ö²ÎÊıÎª·¢ËÍ¶ËÌ×½Ó×Ö£¬µÚËÄ¸ö²ÎÊıÒ»°ãÎª0
+        //å°†æ–‡ä»¶æµä¸­çš„å­—ç¬¦å…¨éƒ¨å‘é€ç»™client
+        send(client, buf, strlen(buf), 0);        //å®¢æˆ·å’ŒæœåŠ¡å™¨éƒ½æ˜¯ä»¥sendå‡½æ•°å‘TCPè¿æ¥çš„å¦ä¸€ç«¯å‘é€æ•°æ®
+                                                  //ç¬¬ä¸€ä¸ªå‚æ•°ä¸ºå‘é€ç«¯å¥—æ¥å­—ï¼Œç¬¬å››ä¸ªå‚æ•°ä¸€èˆ¬ä¸º0
 
         fgets(buf, sizeof(buf), resource);
 
-        /* ´ÓÎÄ¼ş½á¹¹ÌåÖ¸ÕëresourceÖĞ¶ÁÈ¡ÖÁ¶àbufsize-1¸öÊı¾İ£¨'\0'£©
-         * Ã¿´Î¶ÁÈ¡Ò»ĞĞ£¬Èç¹û²»×ãbufsize£¬Ôò¶ÁÈ¡Íê¸ÃĞĞ½áÊø¡£
-         * Í¨¹ıfeofº¯ÊıÅĞ¶ÏfgetsÊÇ·ñÒò³ö´í¶øÖÕÖ¹
-         * ÁíÍâ£¬ÕâÀïÓĞÎÄ¼şÆ«ÒÆÎ»ÖÃ£¬ÏÂÒ»ÂÖ¶ÁÈ¡»á´ÓÉÏÒ»ÂÖ¶ÁÈ¡ÍêµÄÎ»ÖÃ¼ÌĞø
+        /* ä»æ–‡ä»¶ç»“æ„ä½“æŒ‡é’ˆresourceä¸­è¯»å–è‡³å¤šbufsize-1ä¸ªæ•°æ®ï¼ˆ'\0'ï¼‰
+         * æ¯æ¬¡è¯»å–ä¸€è¡Œï¼Œå¦‚æœä¸è¶³bufsizeï¼Œåˆ™è¯»å–å®Œè¯¥è¡Œç»“æŸã€‚
+         * é€šè¿‡feofå‡½æ•°åˆ¤æ–­fgetsæ˜¯å¦å› å‡ºé”™è€Œç»ˆæ­¢
+         * å¦å¤–ï¼Œè¿™é‡Œæœ‰æ–‡ä»¶åç§»ä½ç½®ï¼Œä¸‹ä¸€è½®è¯»å–ä¼šä»ä¸Šä¸€è½®è¯»å–å®Œçš„ä½ç½®ç»§ç»­
         */
     }
 }
@@ -205,11 +205,11 @@ void cat(int client, FILE *resource)
 /* Inform the client that a CGI script could not be executed
  * Parameter: the client socket descriptor.
 */
-/*·µ»Ø·şÎñÆ÷´íÎó£¬×´Ì¬Âë500 */
+/*è¿”å›æœåŠ¡å™¨é”™è¯¯ï¼ŒçŠ¶æ€ç 500 */
 void cannot_execute(int client)
 {
     char buf[1024];
-    //·¢ËÍ500£¬http×´Ì¬Âë500£¬´Ë´íÎóÊÇÒòÎªCGI½Å±¾ÎŞ·¨Ö´ĞĞÒıÆğµÄ
+    //å‘é€500ï¼ŒhttpçŠ¶æ€ç 500ï¼Œæ­¤é”™è¯¯æ˜¯å› ä¸ºCGIè„šæœ¬æ— æ³•æ‰§è¡Œå¼•èµ·çš„
     sprintf(buf, "HTTP/1.0 500 Internal Server Error\r\n");
     send(client, buf, strlen(buf), 0);
     sprintf(buf, "Content-type: text/html\r\n");
@@ -225,13 +225,13 @@ void cannot_execute(int client)
  * on value of errno, which indicates system call errors) and exit the
  * program indicating an error.
 */
-/* ´òÓ¡³ö´íÎóĞÅÏ¢£¬²¢ÖÕÖ¹ */
+/* æ‰“å°å‡ºé”™è¯¯ä¿¡æ¯ï¼Œå¹¶ç»ˆæ­¢ */
 void error_die(const char *sc)
 {
-    perror(sc);     //perrorº¯ÊıÓÃÀ´½«ÉÏÒ»¸öº¯Êı·¢Éú´íÎóµÄÔ­ÒòÊä³öµ½±ê×¼Éè±¸(stderr)£¬
-                    //²ÎÊıscËùÖ¸×Ö·û´®»áÏÈ´òÓ¡;´Ë´íÎóÔ­ÒòÒÀÕÕÈ«¾Ö±äÁ¿errnoµÄÖµÀ´¾ö¶¨ÒªÊä³öµÄ×Ö·û´®
-                    //errnoÎª¼ÇÂ¼ÏµÍ³µÄ×îºóÒ»´Î´íÎó´úÂëµÄÈ«¾Ö±äÁ¿
-    exit(1);    //exit(1)±íÊ¾Òì³£ÍË³ö
+    perror(sc);     //perrorå‡½æ•°ç”¨æ¥å°†ä¸Šä¸€ä¸ªå‡½æ•°å‘ç”Ÿé”™è¯¯çš„åŸå› è¾“å‡ºåˆ°æ ‡å‡†è®¾å¤‡(stderr)ï¼Œ
+                    //å‚æ•°scæ‰€æŒ‡å­—ç¬¦ä¸²ä¼šå…ˆæ‰“å°;æ­¤é”™è¯¯åŸå› ä¾ç…§å…¨å±€å˜é‡errnoçš„å€¼æ¥å†³å®šè¦è¾“å‡ºçš„å­—ç¬¦ä¸²
+                    //errnoä¸ºè®°å½•ç³»ç»Ÿçš„æœ€åä¸€æ¬¡é”™è¯¯ä»£ç çš„å…¨å±€å˜é‡
+    exit(1);    //exit(1)è¡¨ç¤ºå¼‚å¸¸é€€å‡º
 }
 
 /************** execute_cgi ****************/
@@ -240,10 +240,10 @@ void error_die(const char *sc)
  * Parameters: client socket descriptor
                path to the cgi script
 */
-/* Ö´ĞĞcgi(¹«¹²Íø¿¨½Ó¿Ú)½Å±¾£¬ĞèÒªÉè¶¨ºÏÊÊµÄ»·¾³±äÁ¿ */
-/* execute_cgiº¯Êı¸ºÔğ½«ÇëÇó´«µİ¸øcgi³ÌĞò´¦Àí£¬
- * ·şÎñÆ÷ÓëcgiÖ®¼äÍ¨¹ı¹ÜµÀpipeÍ¨ĞÅ£¬Ê×ÏÈ³õÊ¼»¯Á½¸ö¹ÜµÀ£¬²¢´´½¨×Ó½ø³ÌÖ´ĞĞcgiº¯Êı
- * ×Ó½ø³ÌÖ´ĞĞcgi³ÌĞò£¬»ñÈ¡cgiµÄ±ê×¼Êä³öÍ¨¹ı¹ÜµÀ´«¸ø¸¸½ø³Ì£¬ÓÉ¸¸½ø³Ì·¢ËÍ¸ø¿Í»§¶Ë
+/* æ‰§è¡Œcgi(å…¬å…±ç½‘å¡æ¥å£)è„šæœ¬ï¼Œéœ€è¦è®¾å®šåˆé€‚çš„ç¯å¢ƒå˜é‡ */
+/* execute_cgiå‡½æ•°è´Ÿè´£å°†è¯·æ±‚ä¼ é€’ç»™cgiç¨‹åºå¤„ç†ï¼Œ
+ * æœåŠ¡å™¨ä¸cgiä¹‹é—´é€šè¿‡ç®¡é“pipeé€šä¿¡ï¼Œé¦–å…ˆåˆå§‹åŒ–ä¸¤ä¸ªç®¡é“ï¼Œå¹¶åˆ›å»ºå­è¿›ç¨‹æ‰§è¡Œcgiå‡½æ•°
+ * å­è¿›ç¨‹æ‰§è¡Œcgiç¨‹åºï¼Œè·å–cgiçš„æ ‡å‡†è¾“å‡ºé€šè¿‡ç®¡é“ä¼ ç»™çˆ¶è¿›ç¨‹ï¼Œç”±çˆ¶è¿›ç¨‹å‘é€ç»™å®¢æˆ·ç«¯
 */
 void execute_cgi(int client, const char *path const char *method, const char *query_string)
 {
@@ -258,24 +258,24 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
     int content_length = -1;
 
     buf[0] = 'A'; buf[1] = '\0';
-    if (strcasecmp(method, "GET") == 0)     //GET·½·¨£ºÒ»°ãÓÃÓÚ»ñÈ¡/²éÑ¯×ÊÔ´ĞÅÏ¢
-        while ((numchars > 0) && strcmp("\n", buf)) //¶ÁÈ¡²¢¶ªÆúÍ·²¿ĞÅÏ¢
-            numchars = get_line(client, buf, sizeof(buf));  //´Ó¿Í»§¶Ë¶ÁÈ¡
-    else    //POST·½·¨£¬Ò»°ãÓÃÓÚ¸üĞÂ×ÊÔ´ĞÅÏ¢
+    if (strcasecmp(method, "GET") == 0)     //GETæ–¹æ³•ï¼šä¸€èˆ¬ç”¨äºè·å–/æŸ¥è¯¢èµ„æºä¿¡æ¯
+        while ((numchars > 0) && strcmp("\n", buf)) //è¯»å–å¹¶ä¸¢å¼ƒå¤´éƒ¨ä¿¡æ¯
+            numchars = get_line(client, buf, sizeof(buf));  //ä»å®¢æˆ·ç«¯è¯»å–
+    else    //POSTæ–¹æ³•ï¼Œä¸€èˆ¬ç”¨äºæ›´æ–°èµ„æºä¿¡æ¯
     {
         numchars = get_line(client, buf, sizeof(buf));
 
-        //»ñÈ¡HTTPÏûÏ¢ÊµÌåµÄ´«Êä³¤¶È
-        while ((numchars > 0) && strcmp("\n", buf)) //²»¿Õ£¬ÇÒ²»Îª»»ĞĞ·û
+        //è·å–HTTPæ¶ˆæ¯å®ä½“çš„ä¼ è¾“é•¿åº¦
+        while ((numchars > 0) && strcmp("\n", buf)) //ä¸ç©ºï¼Œä¸”ä¸ä¸ºæ¢è¡Œç¬¦
         {
             buf[15] = '\0';
-            if (strcasecmp(buf, "Content_Length:") == 0)    //ÊÇ·ñÎªContent_Length×Ö¶Î
-                content_length = atoi(&buf[16]);    //Content_LengthÓÃÓÚÃèÊöHTTPÏûÏ¢ÊµÌåµÄ´«Êä³¤¶È
+            if (strcasecmp(buf, "Content_Length:") == 0)    //æ˜¯å¦ä¸ºContent_Lengthå­—æ®µ
+                content_length = atoi(&buf[16]);    //Content_Lengthç”¨äºæè¿°HTTPæ¶ˆæ¯å®ä½“çš„ä¼ è¾“é•¿åº¦
             numchars = get_line(client, buf, sizeof(buf));
         }
         if (content_length == -1)
         {
-            bad_request(client);    //ÇëÇóµÄÒ³ÃæÊı¾İÎª¿Õ£¬Ã»ÓĞÊı¾İ£¬¾ÍÊÇÎÒÃÇ´ò¿ªÍøÒ³¾­³£³öÏÖµÄ¿Õ°×Ò³Ãæ
+            bad_request(client);    //è¯·æ±‚çš„é¡µé¢æ•°æ®ä¸ºç©ºï¼Œæ²¡æœ‰æ•°æ®ï¼Œå°±æ˜¯æˆ‘ä»¬æ‰“å¼€ç½‘é¡µç»å¸¸å‡ºç°çš„ç©ºç™½é¡µé¢
             return;
         }
     }
@@ -283,90 +283,90 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
     sprintf(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
 
-    //pipeº¯Êı½¨Á¢¹ÜµÀ£¬³É¹¦·µ»Ø0£¬²ÎÊıÊı×é°üº¬pipeÊ¹ÓÃµÄÁ½¸öÎÄ¼şµÄÃèÊö·û£¬fd[0]:¶ÁÈë¶Ë£¬fd[1]:Ğ´Èë¶Ë
-    //±ØĞëÔÚforkÖĞµ÷ÓÃpipe£¬·ñÔò×Ó½ø³Ì²»»á¼Ì³ĞÎÄ¼şÃèÊö·û¡£
+    //pipeå‡½æ•°å»ºç«‹ç®¡é“ï¼ŒæˆåŠŸè¿”å›0ï¼Œå‚æ•°æ•°ç»„åŒ…å«pipeä½¿ç”¨çš„ä¸¤ä¸ªæ–‡ä»¶çš„æè¿°ç¬¦ï¼Œfd[0]:è¯»å…¥ç«¯ï¼Œfd[1]:å†™å…¥ç«¯
+    //å¿…é¡»åœ¨forkä¸­è°ƒç”¨pipeï¼Œå¦åˆ™å­è¿›ç¨‹ä¸ä¼šç»§æ‰¿æ–‡ä»¶æè¿°ç¬¦ã€‚
     if (pipe(cgi_output) < 0)
     {
-        cannot_execute(client); //¹ÜµÀ½¨Á¢Ê§°Ü
+        cannot_execute(client); //ç®¡é“å»ºç«‹å¤±è´¥
         return;
-    }   //¹ÜµÀÖ»ÄÜ¾ßÓĞ¹«¹²×æÏÈµÄ½ø³Ì¼ä½øĞĞ£¬ÕâÀïÊÇ¸¸×Ó½ø³ÌÖ®¼ä
+    }   //ç®¡é“åªèƒ½å…·æœ‰å…¬å…±ç¥–å…ˆçš„è¿›ç¨‹é—´è¿›è¡Œï¼Œè¿™é‡Œæ˜¯çˆ¶å­è¿›ç¨‹ä¹‹é—´
     if (pipe(cgi_input) < 0)
     {
         cannot_execute(client);
         return;
     }
 
-    //fork×Ó½ø³Ì£¬ÕâÑù´´½¨ÁË¸¸×Ó½ø³Ì¼äµÄIPC(½ø³Ì¼äÍ¨ĞÅ)Í¨µÀ
+    //forkå­è¿›ç¨‹ï¼Œè¿™æ ·åˆ›å»ºäº†çˆ¶å­è¿›ç¨‹é—´çš„IPC(è¿›ç¨‹é—´é€šä¿¡)é€šé“
     if ((pid = fork()) < 0)
     {
-        cannot_execute(client);     //´´½¨Ê§°Ü
+        cannot_execute(client);     //åˆ›å»ºå¤±è´¥
         return;
     }
 
-    /* ÊµÏÖ½ø³Ì¼äµÄ¹ÜµÀÍ¨ĞÅ»úÖÆ */
-    //×Ó½ø³Ì¼Ì³ĞÁË¸¸½ø³ÌµÄpipe£¬È»ºóÍ¨¹ı¹Ø±Õ×Ó½ø³Ìoutput¹ÜµÀµÄout¶Ë£¬input¹ÜµÀµÄin¶Ë£»
-    //¹Ø±Õ¸¸½ø³Ìoutput¹ÜµÀµÄin¶Ë£¬input¹ÜµÀµÄout¶Ë
-    //¹ÜµÀ·ÖÎªÓĞÃû¹ÜµÀºÍÎŞÃû¹ÜµÀ£¬ÕâÀïÊ¹ÓÃµÄÊÇÎŞÃû¹ÜµÀ£¬
-    //Á½¸ö½ø³ÌÈô²»´æÔÚ¹²Ïí×æÏÈ½ø³ÌÔò²»ÄÜÊ¹ÓÃÎŞÃû¹ÜµÀ£¬ÕâÀïÊÇ¸¸×Ó½ø³ÌµÄ¹ØÏµ
-    //ÓĞÃû¹ÜµÀ¿ÉÒÔÔÚÒ»¸öÏµÍ³ÖĞµÄÈÎÒâÁ½¸ö½ø³ÌÖ®¼äÍ¨ĞÅ
-    //×Ó½ø³Ì
-    if (pid == 0)   //ÕâÊÇ×Ó½ø³Ì£¬ÓÃÓÚÖ´ĞĞcgi½Å±¾³ÌĞò
+    /* å®ç°è¿›ç¨‹é—´çš„ç®¡é“é€šä¿¡æœºåˆ¶ */
+    //å­è¿›ç¨‹ç»§æ‰¿äº†çˆ¶è¿›ç¨‹çš„pipeï¼Œç„¶åé€šè¿‡å…³é—­å­è¿›ç¨‹outputç®¡é“çš„outç«¯ï¼Œinputç®¡é“çš„inç«¯ï¼›
+    //å…³é—­çˆ¶è¿›ç¨‹outputç®¡é“çš„inç«¯ï¼Œinputç®¡é“çš„outç«¯
+    //ç®¡é“åˆ†ä¸ºæœ‰åç®¡é“å’Œæ— åç®¡é“ï¼Œè¿™é‡Œä½¿ç”¨çš„æ˜¯æ— åç®¡é“ï¼Œ
+    //ä¸¤ä¸ªè¿›ç¨‹è‹¥ä¸å­˜åœ¨å…±äº«ç¥–å…ˆè¿›ç¨‹åˆ™ä¸èƒ½ä½¿ç”¨æ— åç®¡é“ï¼Œè¿™é‡Œæ˜¯çˆ¶å­è¿›ç¨‹çš„å…³ç³»
+    //æœ‰åç®¡é“å¯ä»¥åœ¨ä¸€ä¸ªç³»ç»Ÿä¸­çš„ä»»æ„ä¸¤ä¸ªè¿›ç¨‹ä¹‹é—´é€šä¿¡
+    //å­è¿›ç¨‹
+    if (pid == 0)   //è¿™æ˜¯å­è¿›ç¨‹ï¼Œç”¨äºæ‰§è¡Œcgiè„šæœ¬ç¨‹åº
     {
         char meth_env[255];
         char query_env[255];
         char length_env[255];
 
-        //¸´ÖÆÎÄ¼ş¾ä±ú£¬ÖØ¶¨Ïò½ø³ÌµÄ±ê×¼ÊäÈëÊä³ö
-        //dup2º¯ÊıÔÚ¹ÜµÀÊµÏÖ½ø³Ì¼äÍ¨ĞÅÖĞÖØ¶¨ÏòÎÄ¼şÃèÊö·û
-        dup2(cgi_output[1], 1); // 1±íÊ¾stdout£¬0±íÊ¾stdin£¬½«ÏµÍ³±ê×¼Êä³öÖØ¶¨ÏòÎªcgi_output[1]
-        dup2(cgi_input[0], 0);  //½«ÏµÍ³±ê×¼ÊäÈëÖØ¶¨ÏòÎªcgi_input[0]
-        close(cgi_output[0]);   //¹Ø±Õcgi_outputÖĞµÄout¶Ë
-        close(cgi_input[1]);    //¹Ø±Õcgi_inputÖĞµÄin¶Ë
+        //å¤åˆ¶æ–‡ä»¶å¥æŸ„ï¼Œé‡å®šå‘è¿›ç¨‹çš„æ ‡å‡†è¾“å…¥è¾“å‡º
+        //dup2å‡½æ•°åœ¨ç®¡é“å®ç°è¿›ç¨‹é—´é€šä¿¡ä¸­é‡å®šå‘æ–‡ä»¶æè¿°ç¬¦
+        dup2(cgi_output[1], 1); // 1è¡¨ç¤ºstdoutï¼Œ0è¡¨ç¤ºstdinï¼Œå°†ç³»ç»Ÿæ ‡å‡†è¾“å‡ºé‡å®šå‘ä¸ºcgi_output[1]
+        dup2(cgi_input[0], 0);  //å°†ç³»ç»Ÿæ ‡å‡†è¾“å…¥é‡å®šå‘ä¸ºcgi_input[0]
+        close(cgi_output[0]);   //å…³é—­cgi_outputä¸­çš„outç«¯
+        close(cgi_input[1]);    //å…³é—­cgi_inputä¸­çš„inç«¯
 
-        //cgi±ê×¼ĞèÒª½«ÇëÇóµÄ·½·¨´æ´¢µ½»·¾³±äÁ¿ÖĞ£¬È»ºóºÍcgi½Å±¾½øĞĞ½»»¥
+        //cgiæ ‡å‡†éœ€è¦å°†è¯·æ±‚çš„æ–¹æ³•å­˜å‚¨åˆ°ç¯å¢ƒå˜é‡ä¸­ï¼Œç„¶åå’Œcgiè„šæœ¬è¿›è¡Œäº¤äº’
         sprintf(meth_env, "REQUEST_METHOD=%s", method);
-        putenv(meth_env);       //putenvº¯ÊıµÄ×÷ÓÃÊÇÔö¼Ó»·¾³±äÁ¿
+        putenv(meth_env);       //putenvå‡½æ•°çš„ä½œç”¨æ˜¯å¢åŠ ç¯å¢ƒå˜é‡
 
         if (strcasecmp(method, "GET") == 0) //get
         {
-            //ÉèÖÃquery_stringµÄ»·¾³±äÁ¿
+            //è®¾ç½®query_stringçš„ç¯å¢ƒå˜é‡
             sprintf(query_env, "QUERY_STRING=%s", query_string);
             putenv(query_env);
         }
         else    //post
         {
-            //ÉèÖÃcontent_LengthµÄ»·¾³±äÁ¿
+            //è®¾ç½®content_Lengthçš„ç¯å¢ƒå˜é‡
             sprintf(length_env, "CONTENT_LENGTH=%d", content_length);
             putenv(length_env);
         }
-        execl(path, paht, NULL);    //execº¯Êı´Ø£¬Ö´ĞĞcgi½Å±¾£¬»ñÈ¡cgiµÄ±ê×¼Êä³ö×÷ÎªÏàÓ¦ÄÚÈİ·¢ËÍ¸ø¿Í»§¶Ë
-        //ÒòÎªÍ¨¹ıdup2Íê³ÉÁËÖØ¶¨Ïò£¬±ê×¼Êä³öÄÚÈİ½øÈë¹ÜµÀoutputµÄÊäÈë¶Ë
+        execl(path, paht, NULL);    //execå‡½æ•°ç°‡ï¼Œæ‰§è¡Œcgiè„šæœ¬ï¼Œè·å–cgiçš„æ ‡å‡†è¾“å‡ºä½œä¸ºç›¸åº”å†…å®¹å‘é€ç»™å®¢æˆ·ç«¯
+        //å› ä¸ºé€šè¿‡dup2å®Œæˆäº†é‡å®šå‘ï¼Œæ ‡å‡†è¾“å‡ºå†…å®¹è¿›å…¥ç®¡é“outputçš„è¾“å…¥ç«¯
 
-        exit(0);    //×Ó½ø³ÌÍË³ö
+        exit(0);    //å­è¿›ç¨‹é€€å‡º
     }
-    else    //Èç¹ûÊÇ¸¸½ø³Ì
+    else    //å¦‚æœæ˜¯çˆ¶è¿›ç¨‹
     {
-        close(cgi_output[1]);   //¹Ø±Õcgi_outputÖĞµÄinÍ¨µÀ£¬×¢ÒâÕâÀïÊÇ¸¸½ø³ÌµÄcgi_output±äÁ¿£¬ºÍ×Ó½ø³ÌÇø·Ö¿ª
-        close(cgi_input[0]);    //¹Ø±Õcgi_inputµÄoutÍ¨µÀ
-        /* Í¨¹ı¹Ø±Õ¶ÔÓ¦¹ÜµÀµÄ¶Ë¿ÚÍ¨µÀ£¬È»ºóÖØ¶¨Ïò×Ó½ø³ÌµÄÄ³¶Ë£¬ÕâÑù¾ÍÔÚ¸¸×Ó½ø³ÌÖ®¼ä¹¹½¨ÁËÒ»Ìõµ¥Ë«¹¤Í¨µÀ
-         * Èç¹û²»½øĞĞÖØ¶¨Ïò£¬½«ÊÇÒ»ÌõµäĞÍµÄÈ«Ë«¹¤¹ÜµÀÍ¨ĞÅ»úÖÆ
+        close(cgi_output[1]);   //å…³é—­cgi_outputä¸­çš„iné€šé“ï¼Œæ³¨æ„è¿™é‡Œæ˜¯çˆ¶è¿›ç¨‹çš„cgi_outputå˜é‡ï¼Œå’Œå­è¿›ç¨‹åŒºåˆ†å¼€
+        close(cgi_input[0]);    //å…³é—­cgi_inputçš„outé€šé“
+        /* é€šè¿‡å…³é—­å¯¹åº”ç®¡é“çš„ç«¯å£é€šé“ï¼Œç„¶åé‡å®šå‘å­è¿›ç¨‹çš„æŸç«¯ï¼Œè¿™æ ·å°±åœ¨çˆ¶å­è¿›ç¨‹ä¹‹é—´æ„å»ºäº†ä¸€æ¡å•åŒå·¥é€šé“
+         * å¦‚æœä¸è¿›è¡Œé‡å®šå‘ï¼Œå°†æ˜¯ä¸€æ¡å…¸å‹çš„å…¨åŒå·¥ç®¡é“é€šä¿¡æœºåˆ¶
         */
-        if (strcasecmp(method, "POST") == 0)    //post·½Ê½£¬½«Ö¸¶¨ºÃµÄ´«Êä³¤¶È×Ö·û·¢ËÍ
-            /* ½ÓÊÕpost¹ıÀ´µÄÊı¾İ */
+        if (strcasecmp(method, "POST") == 0)    //postæ–¹å¼ï¼Œå°†æŒ‡å®šå¥½çš„ä¼ è¾“é•¿åº¦å­—ç¬¦å‘é€
+            /* æ¥æ”¶postè¿‡æ¥çš„æ•°æ® */
         for (i = 0; i < content_length; i++)
         {
-            recv(client, &c, 1, 0); //´Ó¿Í»§¶Ë½ÓÊÕµ¥¸ö×Ö·û
-            write(cgi_input[1], &c, 1); //Ğ´Èëcgi_inputµÄinÍ¨µÀ
-            //Êı¾İ´«ËÍ¹ı³Ì£ºinput[1](parent) --> input[0](child)[Ö´ĞĞcgiº¯Êı] --> STDIN --> STDOUT
-            // --> output[1](child) -- > output[0](parent)[½«½á¹û·¢ËÍ¸ø¿Í»§¶Ë]
+            recv(client, &c, 1, 0); //ä»å®¢æˆ·ç«¯æ¥æ”¶å•ä¸ªå­—ç¬¦
+            write(cgi_input[1], &c, 1); //å†™å…¥cgi_inputçš„iné€šé“
+            //æ•°æ®ä¼ é€è¿‡ç¨‹ï¼šinput[1](parent) --> input[0](child)[æ‰§è¡Œcgiå‡½æ•°] --> STDIN --> STDOUT
+            // --> output[1](child) -- > output[0](parent)[å°†ç»“æœå‘é€ç»™å®¢æˆ·ç«¯]
 
         }
-        while (read(cgi_output[0], &c, 1) > 0)  //¶ÁÈ¡Êä³öÄÚÈİµ½¿Í»§¶Ë
+        while (read(cgi_output[0], &c, 1) > 0)  //è¯»å–è¾“å‡ºå†…å®¹åˆ°å®¢æˆ·ç«¯
             send(client, &c, 1, 0); //
 
-        close(cgi_output[0]);   //¹Ø±ÕÊ£ÏÂµÄ¹ÜµÀ¶Ë
+        close(cgi_output[0]);   //å…³é—­å‰©ä¸‹çš„ç®¡é“ç«¯
         close(cgi_input[1]);
-        waitpid(pid, &status, 0);   //µÈ´ı×Ó½ø³ÌÖÕÖ¹
+        waitpid(pid, &status, 0);   //ç­‰å¾…å­è¿›ç¨‹ç»ˆæ­¢
     }
 
 }
@@ -385,43 +385,43 @@ void execute_cgi(int client, const char *path const char *method, const char *qu
  *             the size of the buffer
  * Returns: the number of bytes stored (excluding null)
 */
-/* ¶ÁÈ¡Ò»ĞĞhttp±¨ÎÄ£¬ÒÔ\r»ò\r\n½áÎ² */
+/* è¯»å–ä¸€è¡ŒhttpæŠ¥æ–‡ï¼Œä»¥\ræˆ–\r\nç»“å°¾ */
 int get_line(int sock, char *buf, int size)
 {
     int i = 0;
-    char c = '\0';  //'\0'±íÊ¾NULL
+    char c = '\0';  //'\0'è¡¨ç¤ºNULL
     int n;
 
-    //ÖÁ¶à¶ÁÈ¡size-1¸ö×Ö·û£¬×îºóÒ»¸ö×Ö·ûÖÃÎª'\0'
+    //è‡³å¤šè¯»å–size-1ä¸ªå­—ç¬¦ï¼Œæœ€åä¸€ä¸ªå­—ç¬¦ç½®ä¸º'\0'
     while ((i < size - 1) && (c != '\n'))
     {
-        n = recv(sock, &c, 1, 0);   //µ¥¸ö×Ö·û½ÓÊÕ
-                                    //¿Í»§ºÍ·şÎñÆ÷¶¼ÓÃrecvº¯Êı´ÓTCPÁ¬½ÓµÄÁíÒ»¶Ë½ÓÊÕÊı¾İ
-                                    //µÚÒ»¸ö²ÎÊıÖ¸¶¨½ÓÊÕ¶ËÌ×½Ó×ÖÃèÊö·û£»
-                                    //µÚ¶ş¸ö²ÎÊıÖ¸Ã÷Ò»¸ö»º³åÇøµØÖ·£¬¸Ã»º³åÇøÓÃÀ´´æ·Årecvº¯Êı½ÓÊÕµ½µÄÊı¾İ
+        n = recv(sock, &c, 1, 0);   //å•ä¸ªå­—ç¬¦æ¥æ”¶
+                                    //å®¢æˆ·å’ŒæœåŠ¡å™¨éƒ½ç”¨recvå‡½æ•°ä»TCPè¿æ¥çš„å¦ä¸€ç«¯æ¥æ”¶æ•°æ®
+                                    //ç¬¬ä¸€ä¸ªå‚æ•°æŒ‡å®šæ¥æ”¶ç«¯å¥—æ¥å­—æè¿°ç¬¦ï¼›
+                                    //ç¬¬äºŒä¸ªå‚æ•°æŒ‡æ˜ä¸€ä¸ªç¼“å†²åŒºåœ°å€ï¼Œè¯¥ç¼“å†²åŒºç”¨æ¥å­˜æ”¾recvå‡½æ•°æ¥æ”¶åˆ°çš„æ•°æ®
 
-        if (n > 0)  //recv½ÓÊÕ³É¹¦
+        if (n > 0)  //recvæ¥æ”¶æˆåŠŸ
         {
-            if (c == '\r')  //Èç¹ûÊÇ»Ø³µ·û£¬Ôò¼ÌĞø¶ÁÈ¡
+            if (c == '\r')  //å¦‚æœæ˜¯å›è½¦ç¬¦ï¼Œåˆ™ç»§ç»­è¯»å–
             {
-                //Ê¹ÓÃMSG_PEEK±êÖ¾Ê¹ÏÂÒ»´Î¶ÁÈ¡ÒÀÈ»¿ÉÒÔµÃµ½Õâ´Î¶ÁÈ¡µÄÄÚÈİ£¬¿ÉÈÏÎª½ÓÊÕ´°¿Ú²»»¬¶¯
+                //ä½¿ç”¨MSG_PEEKæ ‡å¿—ä½¿ä¸‹ä¸€æ¬¡è¯»å–ä¾ç„¶å¯ä»¥å¾—åˆ°è¿™æ¬¡è¯»å–çš„å†…å®¹ï¼Œå¯è®¤ä¸ºæ¥æ”¶çª—å£ä¸æ»‘åŠ¨
                 n = recv(sock, &c, 1, MSG_PEEK);
 
-                if ((n > 0) && (c == '\n')) //  Èç¹ûÊÇ»Ø³µ»»ĞĞ·û
-                    recv(sock, &c, 1, 0);   //¼ÌĞø½ÓÊÕµ¥¸ö×Ö·û£¬Êµ¼ÊÉÏºÍÉÏÃæÄÇ¸ö±êÖ¾Î»MSG_PEEK¶ÁÈ¡Í¬ÑùµÄ×Ö·û
-                                            //¶ÁÍêÉ¾³ıÊäÈë¶ÓÁĞµÄÊı¾İ£¬¼´»¬¶¯´°¿Ú£¬c=='\n'
+                if ((n > 0) && (c == '\n')) //  å¦‚æœæ˜¯å›è½¦æ¢è¡Œç¬¦
+                    recv(sock, &c, 1, 0);   //ç»§ç»­æ¥æ”¶å•ä¸ªå­—ç¬¦ï¼Œå®é™…ä¸Šå’Œä¸Šé¢é‚£ä¸ªæ ‡å¿—ä½MSG_PEEKè¯»å–åŒæ ·çš„å­—ç¬¦
+                                            //è¯»å®Œåˆ é™¤è¾“å…¥é˜Ÿåˆ—çš„æ•°æ®ï¼Œå³æ»‘åŠ¨çª—å£ï¼Œc=='\n'
                 else
-                    c = '\n';   //Ö»ÊÇ¶ÁÈ¡µ½»Ø³µ·û£¬ÔòÖµÎª»»ĞĞ·û£¬Ò²ÖÕÖ¹ÁË¶ÁÈ¡
+                    c = '\n';   //åªæ˜¯è¯»å–åˆ°å›è½¦ç¬¦ï¼Œåˆ™å€¼ä¸ºæ¢è¡Œç¬¦ï¼Œä¹Ÿç»ˆæ­¢äº†è¯»å–
             }
-            buf[i] = c; //½«¶ÁÈ¡µ½µÄÊı¾İ·ÅÈë»º³åÇø
-            i++;    //Ñ­»·½øĞĞÏÂÒ»´Î¶ÁÈ¡
+            buf[i] = c; //å°†è¯»å–åˆ°çš„æ•°æ®æ”¾å…¥ç¼“å†²åŒº
+            i++;    //å¾ªç¯è¿›è¡Œä¸‹ä¸€æ¬¡è¯»å–
         }
-        else    //Ã»ÓĞ¶Áµ½ÈÎºÎÊı¾İ
+        else    //æ²¡æœ‰è¯»åˆ°ä»»ä½•æ•°æ®
             c = '\n';
     }
     buf[i] = '\0';
 
-    return(i);  //·µ»Ø¶ÁÈ¡µ½µÄ×Ö·û¸öÊı£¨°üÀ¨'\0'£©
+    return(i);  //è¿”å›è¯»å–åˆ°çš„å­—ç¬¦ä¸ªæ•°ï¼ˆåŒ…æ‹¬'\0'ï¼‰
 }
 
 /************** headers ****************/
@@ -429,15 +429,15 @@ int get_line(int sock, char *buf, int size)
  * Parameters: the socket to print the headers on the
  * name of the file
 */
-/* ³É¹¦·µ»ØhttpÏìÓ¦Í·²¿ĞÅÏ¢ */
+/* æˆåŠŸè¿”å›httpå“åº”å¤´éƒ¨ä¿¡æ¯ */
 void headers(int client, const char *filename)
 {
     char buf[1024];
-    (void)filename; //(void)var µÄ×÷ÓÃÊÇ£º±ÜÃâÎ´Ê¹ÓÃ±äÁ¿µÄ±àÒë¾¯¸æ
+    (void)filename; //(void)var çš„ä½œç”¨æ˜¯ï¼šé¿å…æœªä½¿ç”¨å˜é‡çš„ç¼–è¯‘è­¦å‘Š
 
     strcpy(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
-    strcpy(buf, SERVER_STRING);         //SERVER_STRINGÎªdefineµÄserverÃû×Ö
+    strcpy(buf, SERVER_STRING);         //SERVER_STRINGä¸ºdefineçš„serveråå­—
     send(client, buf, strlen(buf), 0);
     strcpy(buf, "Content-Type: text/html\r\n");
     send(client, buf, strlen(buf), 0);
@@ -448,11 +448,11 @@ void headers(int client, const char *filename)
 /************** not_found ****************/
 /* Give a client a 404 not found status message
 */
-/* ·µ»Ø404 */
+/* è¿”å›404 */
 void not_found(int client)
 {
     char buf[1024];
-    //·µ»Ø404
+    //è¿”å›404
     sprintf(buf, "HTTP/1.0 404 NOT FOUND\r\n");
     send(client, buf, strlen(buf), 0);
     sprintf(buf, SERVER_STRING);
@@ -481,7 +481,7 @@ void not_found(int client)
  *             file descriptor
  *             the name of the file to serve
 */
-/* ½«ÇëÇóµÄÎÄ¼ş·¢ËÍ»Øclient */
+/* å°†è¯·æ±‚çš„æ–‡ä»¶å‘é€å›client */
 void serve_file(int client, const char *filename)
 {
     FILE *resource = NULL;
@@ -489,20 +489,20 @@ void serve_file(int client, const char *filename)
     char buf[1024];
 
     buf[0] = 'A';
-    buf[1] = '\0';  //ÕâÁ½¸ö²»ÖªµÀÊÇ¸ÉÊ²Ã´µÄ
+    buf[1] = '\0';  //è¿™ä¸¤ä¸ªä¸çŸ¥é“æ˜¯å¹²ä»€ä¹ˆçš„
     while ((numchars > 0) && strcmp("\n", buf))     //read & discard headers
-        numchars = get_line(client, buf, sizeof(buf));      //°´ĞĞ¶ÁÈ¡Öµclient
+        numchars = get_line(client, buf, sizeof(buf));      //æŒ‰è¡Œè¯»å–å€¼client
 
-    resource = fopen(filename, "r");    //ÒÔÖ»¶ÁĞÎÊ½´ò¿ªÎÄ¼ş
-                                        //fopen´ò¿ªÎÄ¼ş£¬²¢·µ»ØÎÄ¼şÖ¸Õë£¨FILE*£©
+    resource = fopen(filename, "r");    //ä»¥åªè¯»å½¢å¼æ‰“å¼€æ–‡ä»¶
+                                        //fopenæ‰“å¼€æ–‡ä»¶ï¼Œå¹¶è¿”å›æ–‡ä»¶æŒ‡é’ˆï¼ˆFILE*ï¼‰
     if (resource == NULL)
-        not_found(client);  //Èç¹ûÎÄ¼ş²»´æÔÚ£¬µ÷ÓÃnot_found·µ»Ø404
+        not_found(client);  //å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨ï¼Œè°ƒç”¨not_foundè¿”å›404
     else
     {
-        headers(client, filename);  //ÏÈ·µ»ØÎÄ¼şÍ·²¿ĞÅÏ¢£¬¼´Õı³£¶ÁÈ¡ÎÄ¼ş200
-        cat(client, resource);      //½«resourceÃèÊö·ûÖ¸¶¨ÎÄ¼şÖĞµÄÊı¾İ·¢ËÍ¸øclient
+        headers(client, filename);  //å…ˆè¿”å›æ–‡ä»¶å¤´éƒ¨ä¿¡æ¯ï¼Œå³æ­£å¸¸è¯»å–æ–‡ä»¶200
+        cat(client, resource);      //å°†resourceæè¿°ç¬¦æŒ‡å®šæ–‡ä»¶ä¸­çš„æ•°æ®å‘é€ç»™client
     }
-    fclose(resource);   //¹Ø±Õ
+    fclose(resource);   //å…³é—­
 }
 
 /************** startup ****************/
@@ -513,45 +513,45 @@ void serve_file(int client, const char *filename)
  * Parameters: pointer to variable containing the port to connect on
  * Returns: the socket
 */
-/*Æô¶¯·şÎñÆ÷£¬°üÀ¨´´½¨·şÎñÆ÷Ì×½Ó×Ö£¬°ó¶¨¶Ë¿Ú£¬¼àÌı£»
- *·µ»ØÒ»¸ö¼àÌıÌ×½Ó×Ö
+/*å¯åŠ¨æœåŠ¡å™¨ï¼ŒåŒ…æ‹¬åˆ›å»ºæœåŠ¡å™¨å¥—æ¥å­—ï¼Œç»‘å®šç«¯å£ï¼Œç›‘å¬ï¼›
+ *è¿”å›ä¸€ä¸ªç›‘å¬å¥—æ¥å­—
 */
 int startup(u_short *port)
 {
     int httpd = 0;
     struct sockaddr_in name;
 
-    httpd = socket(PF_INET, SOCK_STREAM, 0);    //´´½¨·şÎñÆ÷¶ËÌ×½Ó×Ö£¬³É¹¦µ«»á·Ç¸º£¬Ê§°Ü·µ»Ø-1
-                                                //ÔÚ´úÂëÖĞ¼¸ºõ¶¼ÊÇ±¾¾äµÄĞ´·¨£¬ÕâÀï×¢ÒâPF_INETÓëAF_INETµÄÇø±ğ£¨ÆäÊµÊÇ¿ÉÒÔ»ìÓÃµÄ£¬ÊÇÖ¸²»¹æ·¶£©
-                                                //AF_INET±íÃ÷ÎÒÃÇÕıÔÚÊ¹ÓÃÒòÌØÍø
-                                                //SOCK_STREAM±íÊ¾Õâ¸öÌ×½Ó×ÖÊÇÒòÌØÍøÁ¬½ÓµÄÒ»¸ö¶Ëµã
+    httpd = socket(PF_INET, SOCK_STREAM, 0);    //åˆ›å»ºæœåŠ¡å™¨ç«¯å¥—æ¥å­—ï¼ŒæˆåŠŸä½†ä¼šéè´Ÿï¼Œå¤±è´¥è¿”å›-1
+                                                //åœ¨ä»£ç ä¸­å‡ ä¹éƒ½æ˜¯æœ¬å¥çš„å†™æ³•ï¼Œè¿™é‡Œæ³¨æ„PF_INETä¸AF_INETçš„åŒºåˆ«ï¼ˆå…¶å®æ˜¯å¯ä»¥æ··ç”¨çš„ï¼Œæ˜¯æŒ‡ä¸è§„èŒƒï¼‰
+                                                //AF_INETè¡¨æ˜æˆ‘ä»¬æ­£åœ¨ä½¿ç”¨å› ç‰¹ç½‘
+                                                //SOCK_STREAMè¡¨ç¤ºè¿™ä¸ªå¥—æ¥å­—æ˜¯å› ç‰¹ç½‘è¿æ¥çš„ä¸€ä¸ªç«¯ç‚¹
     if (httpd == -1)
         error_die("socket");
 
     memset(&name, 0, sizeof(name));
-    /*ÉèÖÃÌ×½Ó×ÖµØÖ·½á¹¹*/
-    name.sin_family = AF_INET;  //ÉèÖÃµØÖ·´Ø£¬sin_family±íÊ¾address family£¬AF_INET±íÊ¾Ê¹ÓÃTCP/IPĞ­Òé×åµÄµØÖ·
-    name.sin_port = htons(*port);   //Ö¸¶¨¶Ë¿Ú£¬sin_port±íÊ¾port number£¬htonsº¯Êı½«Ö÷»úµÄÎŞ·ûºÅ¶ÌÕûĞÍÊı×ª»»³ÉÍøÂç×Ö½ÚË³Ğò
-    name.sin_addr.s_addr = htonl(INADDR_ANY);   //Í¨ÅäµØÖ·£¬s.addr±íÊ¾ip address£¬htonl½«Ö÷»úÊı×ª»»³ÉÎŞ·ûºÅ³¤ÕûĞÍµÄÍøÂç×Ö½ÚË³Ğò
+    /*è®¾ç½®å¥—æ¥å­—åœ°å€ç»“æ„*/
+    name.sin_family = AF_INET;  //è®¾ç½®åœ°å€ç°‡ï¼Œsin_familyè¡¨ç¤ºaddress familyï¼ŒAF_INETè¡¨ç¤ºä½¿ç”¨TCP/IPåè®®æ—çš„åœ°å€
+    name.sin_port = htons(*port);   //æŒ‡å®šç«¯å£ï¼Œsin_portè¡¨ç¤ºport numberï¼Œhtonså‡½æ•°å°†ä¸»æœºçš„æ— ç¬¦å·çŸ­æ•´å‹æ•°è½¬æ¢æˆç½‘ç»œå­—èŠ‚é¡ºåº
+    name.sin_addr.s_addr = htonl(INADDR_ANY);   //é€šé…åœ°å€ï¼Œs.addrè¡¨ç¤ºip addressï¼Œhtonlå°†ä¸»æœºæ•°è½¬æ¢æˆæ— ç¬¦å·é•¿æ•´å‹çš„ç½‘ç»œå­—èŠ‚é¡ºåº
 
-    if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)    //½«httpdÌ×½Ó×Ö°ó¶¨µ½Ö¸¶¨µØÖ·ºÍ¶Ë¿Ú
-                                                                    //bindº¯Êı½«nameÖĞµÄ·şÎñÆ÷Ì×½Ó×ÖµØÖ·ºÍÌ×½Ó×ÖÃèÊö·ûhttpdÁªÏµÆğÀ´
-                                                                    //³É¹¦·µ»Ø0£¬Ê§°Ü·µ»Ø-1
+    if (bind(httpd, (struct sockaddr *)&name, sizeof(name)) < 0)    //å°†httpdå¥—æ¥å­—ç»‘å®šåˆ°æŒ‡å®šåœ°å€å’Œç«¯å£
+                                                                    //bindå‡½æ•°å°†nameä¸­çš„æœåŠ¡å™¨å¥—æ¥å­—åœ°å€å’Œå¥—æ¥å­—æè¿°ç¬¦httpdè”ç³»èµ·æ¥
+                                                                    //æˆåŠŸè¿”å›0ï¼Œå¤±è´¥è¿”å›-1
         error_die("bind");
 
-    if (*port == 0) //Èç¹û*port==0£¬Ôò¶¯Ì¬·ÖÅäÒ»¸ö¶Ë¿Ú
+    if (*port == 0) //å¦‚æœ*port==0ï¼Œåˆ™åŠ¨æ€åˆ†é…ä¸€ä¸ªç«¯å£
     {
         int namelen = sizeof(name);
-        //ÔÚÒÔ¶Ë¿Ú0µ÷ÓÃbindºó£¬getsocknameÓÃÓÚ·µ»ØÓÉÄÚºË¸³ÓèµÄ±¾µØ¶Ë¿ÚºÅ
-        if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)   //getsocknameÓÃÓÚ»ñÈ¡Ì×½Ó×ÖµÄµØÖ·½á¹¹
-                                                                            //ÔÚÕâÀïÊÇÒÔ¶Ë¿ÚºÅ0µ÷ÓÃbindÖ®ºó£¬ÓÃÓÚ·µ»ØÄÚºË¸³ÓèµÄ±¾µØ¶Ë¿ÚºÅ
-                                                                            //³É¹¦·µ»Ø0£¬Ê§°Ü·µ»Ø-1
+        //åœ¨ä»¥ç«¯å£0è°ƒç”¨bindåï¼Œgetsocknameç”¨äºè¿”å›ç”±å†…æ ¸èµ‹äºˆçš„æœ¬åœ°ç«¯å£å·
+        if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)   //getsocknameç”¨äºè·å–å¥—æ¥å­—çš„åœ°å€ç»“æ„
+                                                                            //åœ¨è¿™é‡Œæ˜¯ä»¥ç«¯å£å·0è°ƒç”¨bindä¹‹åï¼Œç”¨äºè¿”å›å†…æ ¸èµ‹äºˆçš„æœ¬åœ°ç«¯å£å·
+                                                                            //æˆåŠŸè¿”å›0ï¼Œå¤±è´¥è¿”å›-1
             error_die("getsockname");
-        *port = ntohs(name.sin_port);   //ÍøÂç×Ö½ÚË³Ğò×ª»»ÎªÖ÷»ú×Ö½ÚË³Ğò£¬·µ»ØÖ÷»ú×Ö½ÚË³Ğò±í´ïµÄÊı
+        *port = ntohs(name.sin_port);   //ç½‘ç»œå­—èŠ‚é¡ºåºè½¬æ¢ä¸ºä¸»æœºå­—èŠ‚é¡ºåºï¼Œè¿”å›ä¸»æœºå­—èŠ‚é¡ºåºè¡¨è¾¾çš„æ•°
     }
 
-    if (listen(httpd, 5) < 0)   //listen½«httpd½«Ö÷¶¯Ì×½Ó×Ö×ª»¯Îª¼àÌıÌ×½Ó×Ö£¬Ö®ºó¿ÉÒÔ½ÓÊÜÀ´×Ô¿Í»§¶ËµÄÁ¬½ÓÇëÇó
-                                //5Õâ¸ö²ÎÊı°µÊ¾ÁËÄÚºËÔÚ¿ªÊ¼¾Ü¾øÁ¬½ÓÇëÇóÖ®Ç°£¬Ó¦¸Ã·ÅÈë¶ÓÁĞÖĞµÈ´ıµÄÎ´Íê³ÉÁ¬½ÓÇëÇóµÄÊıÁ¿£¬Í¨³£ÉèÖÃÎª1024
+    if (listen(httpd, 5) < 0)   //listenå°†httpdå°†ä¸»åŠ¨å¥—æ¥å­—è½¬åŒ–ä¸ºç›‘å¬å¥—æ¥å­—ï¼Œä¹‹åå¯ä»¥æ¥å—æ¥è‡ªå®¢æˆ·ç«¯çš„è¿æ¥è¯·æ±‚
+                                //5è¿™ä¸ªå‚æ•°æš—ç¤ºäº†å†…æ ¸åœ¨å¼€å§‹æ‹’ç»è¿æ¥è¯·æ±‚ä¹‹å‰ï¼Œåº”è¯¥æ”¾å…¥é˜Ÿåˆ—ä¸­ç­‰å¾…çš„æœªå®Œæˆè¿æ¥è¯·æ±‚çš„æ•°é‡ï¼Œé€šå¸¸è®¾ç½®ä¸º1024
         error_die("listen");
 
     return(httpd);
@@ -562,11 +562,11 @@ int startup(u_short *port)
  * implemented.
  * Parameter: the client socket
 */
-/* Í¨ÖªclientËùÌá³öµÄÇëÇó·½·¨²»±»·şÎñÆ÷Ö§³Ö */
+/* é€šçŸ¥clientæ‰€æå‡ºçš„è¯·æ±‚æ–¹æ³•ä¸è¢«æœåŠ¡å™¨æ”¯æŒ */
 void unimplemented(int client)
 {
     char buf[1024];
-    //·¢ËÍ501±íÊ¾ÏàÓ¦·½·¨Î´ÊµÏÖ
+    //å‘é€501è¡¨ç¤ºç›¸åº”æ–¹æ³•æœªå®ç°
     sprintf(buf, "HTTP/1.0 501 Method Not Implemented\r\n");
     send(client, buf, strlen(buf), 0);
     sprintf(buf, SERVER_STRING);
@@ -588,34 +588,34 @@ void unimplemented(int client)
 int main()
 {
     int server_sock = -1;
-    u_short port = 0;   //´«ÈëµÄ¶Ë¿ÚÎª0
+    u_short port = 0;   //ä¼ å…¥çš„ç«¯å£ä¸º0
     int client_sock = -1;
-    struct sockaddr_in client_name;      //sockaddr_inÊı¾İ½á¹¹ÓÃ×÷ÍøÂç±à³Ìº¯ÊıµÄ²ÎÊı£¬Ö¸Ã÷µØÖ·ĞÅÏ¢¡£
+    struct sockaddr_in client_name;      //sockaddr_inæ•°æ®ç»“æ„ç”¨ä½œç½‘ç»œç¼–ç¨‹å‡½æ•°çš„å‚æ•°ï¼ŒæŒ‡æ˜åœ°å€ä¿¡æ¯ã€‚
     int client_name_len = sizeof(client_name);
-    pthread_t newthread;    //pthread_tÓÃÓÚÉùÃ÷Ïß³ÌID
+    pthread_t newthread;    //pthread_tç”¨äºå£°æ˜çº¿ç¨‹ID
 
-    server_sock = startup(&port);   //·şÎñÆ÷¶Ë¼àÌıÌ×½Ó×ÖÉèÖÃ
+    server_sock = startup(&port);   //æœåŠ¡å™¨ç«¯ç›‘å¬å¥—æ¥å­—è®¾ç½®
     printf("httpd running on port %d\n", port);
 
-    /*¶àÏß³Ì²¢·¢·şÎñÆ÷Ä£Ê½*/
+    /*å¤šçº¿ç¨‹å¹¶å‘æœåŠ¡å™¨æ¨¡å¼*/
     while(1)
     {
-        /*Ö÷Ïß³Ì*/
-        //acceptº¯ÊıµÈ´ıÀ´×Ô¿Í»§¶ËµÄÁ¬½ÓÇëÇóµ½´ïÕìÌıÃèÊö·ûserver_sock£¬µÚ¶ş¸ö²ÎÊıÎªÌîÈë¿Í»§¶ËÌ×½Ó×ÖµØÖ·(&client_name)
-        //·µ»ØÒ»¸öÒÑÁ¬½ÓµÄÃèÊö·û£¬Èô³É¹¦ÔòÎª·Ç¸ºÁ¬½ÓÃèÊö·û£¬Èô³ö´íÔòÎª-1
-        client_sock = accept(server_sock, (struct sockaddr *)&client_name, &client_name_len);   //accept×èÈûµÈ´ı¿Í»§¶ËÁ¬½ÓÇëÇó
+        /*ä¸»çº¿ç¨‹*/
+        //acceptå‡½æ•°ç­‰å¾…æ¥è‡ªå®¢æˆ·ç«¯çš„è¿æ¥è¯·æ±‚åˆ°è¾¾ä¾¦å¬æè¿°ç¬¦server_sockï¼Œç¬¬äºŒä¸ªå‚æ•°ä¸ºå¡«å…¥å®¢æˆ·ç«¯å¥—æ¥å­—åœ°å€(&client_name)
+        //è¿”å›ä¸€ä¸ªå·²è¿æ¥çš„æè¿°ç¬¦ï¼Œè‹¥æˆåŠŸåˆ™ä¸ºéè´Ÿè¿æ¥æè¿°ç¬¦ï¼Œè‹¥å‡ºé”™åˆ™ä¸º-1
+        client_sock = accept(server_sock, (struct sockaddr *)&client_name, &client_name_len);   //accepté˜»å¡ç­‰å¾…å®¢æˆ·ç«¯è¿æ¥è¯·æ±‚
 
-        if (client_sock == -1)      //acceptÎ´³É¹¦·µ»ØÒÑÁ¬½ÓÃèÊö·û
-            error_die("accept");    //error_dieº¯Êı½«´íÎóĞÅÏ¢Ğ´µ½perrorÖĞ¡£
+        if (client_sock == -1)      //acceptæœªæˆåŠŸè¿”å›å·²è¿æ¥æè¿°ç¬¦
+            error_die("accept");    //error_dieå‡½æ•°å°†é”™è¯¯ä¿¡æ¯å†™åˆ°perrorä¸­ã€‚
 
-        /*ÅÉÉúĞÂĞÂÏß³ÌÓÃaccept_requestº¯Êı´¦ÀíĞÂÇëÇó*/
+        /*æ´¾ç”Ÿæ–°æ–°çº¿ç¨‹ç”¨accept_requestå‡½æ•°å¤„ç†æ–°è¯·æ±‚*/
         /*accept_request(client_sock);*/
-        //pthread_createÎªÀàUnixÏµÍ³ÖĞ´´½¨Ïß³ÌµÄº¯Êı£¬³É¹¦Ôò·µ»Ø0£¬client_sockÎªÏòÏß³Ìº¯Êıaccept_request´«µİµÄ²ÎÊı
-        if (pthread_create(&newthread, NULL, accept_request, client_sock) != 0) //´´½¨¹¤×÷Ïß³Ì£¬Ö´ĞĞ»Øµ÷º¯Êıaccept_request£¬²ÎÊıclient_sock
-            perror("pthread_create");      //perror´òÓ¡×î½üÒ»´ÎÏµÍ³´íÎóĞÅÏ¢£¬´Ë´¦Îª´´½¨Ïß³ÌÊ§°Ü
+        //pthread_createä¸ºç±»Unixç³»ç»Ÿä¸­åˆ›å»ºçº¿ç¨‹çš„å‡½æ•°ï¼ŒæˆåŠŸåˆ™è¿”å›0ï¼Œclient_sockä¸ºå‘çº¿ç¨‹å‡½æ•°accept_requestä¼ é€’çš„å‚æ•°
+        if (pthread_create(&newthread, NULL, accept_request, client_sock) != 0) //åˆ›å»ºå·¥ä½œçº¿ç¨‹ï¼Œæ‰§è¡Œå›è°ƒå‡½æ•°accept_requestï¼Œå‚æ•°client_sock
+            perror("pthread_create");      //perroræ‰“å°æœ€è¿‘ä¸€æ¬¡ç³»ç»Ÿé”™è¯¯ä¿¡æ¯ï¼Œæ­¤å¤„ä¸ºåˆ›å»ºçº¿ç¨‹å¤±è´¥
     }
 
-    close(server_sock); //¹Ø±ÕÌ×½Ó×Ö£¬¾ÍĞ­ÒéÕ»¶øÑÔ£¬¼´¹Ø±ÕTCPÁ¬½Ó
+    close(server_sock); //å…³é—­å¥—æ¥å­—ï¼Œå°±åè®®æ ˆè€Œè¨€ï¼Œå³å…³é—­TCPè¿æ¥
 
     return 0;
 }
